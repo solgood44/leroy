@@ -1,7 +1,12 @@
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
+import {
+  displayNameFromFilename,
+  normalizeNameKey,
+  pickBestPersonMatch,
+  type ScoredPerson,
+} from "./nameMatch";
 import { groupSubmissionsByPerson, parseFormSheetCsv } from "./sheet";
-import { pickBestPersonMatch, type ScoredPerson } from "./nameMatch";
 
 /** One image or video file (no form text — that lives on the person album). */
 export type MemoryFile = {
@@ -11,12 +16,15 @@ export type MemoryFile = {
   kind: "image" | "video";
 };
 
-/** All media from people who matched the form, grouped with their submissions. */
+/** Grouped media: form submissions and/or name parsed from filenames. */
 export type PersonAlbum = {
   nameKey: string;
+  /** e.g. "Millie Wibert" or "Photos from Kirk Riley" */
   displayName: string;
   submissions: import("./sheet").SheetSubmission[];
   media: MemoryFile[];
+  /** True when there was no Google Form row—label comes from Dropbox filename only */
+  fromFilenameOnly?: boolean;
 };
 
 export type MemoryStory = {
@@ -28,9 +36,8 @@ export type MemoryStory = {
 
 export type MemoriesPayload = {
   generatedAt: string;
-  /** One entry per person who has at least one matched photo/video */
   albums: PersonAlbum[];
-  /** Files we couldn’t tie to a form name */
+  /** No form match and we couldn’t read a name from the filename */
   unmatchedMedia: MemoryFile[];
   storiesWithoutMedia: MemoryStory[];
 };
@@ -93,6 +100,7 @@ export async function buildMemories(): Promise<MemoriesPayload> {
   const files = await listMemoryMedia();
 
   const byPerson = new Map<string, MemoryFile[]>();
+  const byFilenameName = new Map<string, MemoryFile[]>();
   const unmatchedMedia: MemoryFile[] = [];
 
   for (const { relPath, baseName } of files) {
@@ -112,12 +120,21 @@ export async function buildMemories(): Promise<MemoriesPayload> {
       const key = group.key;
       if (!byPerson.has(key)) byPerson.set(key, []);
       byPerson.get(key)!.push(file);
+      continue;
+    }
+
+    const parsed = displayNameFromFilename(baseName);
+    if (parsed) {
+      const fk = normalizeNameKey(parsed);
+      if (!byFilenameName.has(fk)) byFilenameName.set(fk, []);
+      byFilenameName.get(fk)!.push(file);
     } else {
       unmatchedMedia.push(file);
     }
   }
 
   const albums: PersonAlbum[] = [];
+
   for (const p of people) {
     const media = byPerson.get(p.key);
     if (!media?.length) continue;
@@ -127,17 +144,38 @@ export async function buildMemories(): Promise<MemoriesPayload> {
       displayName: p.displayName,
       submissions: p.submissions,
       media,
+      fromFilenameOnly: false,
     });
   }
 
-  albums.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  for (const [fk, media] of byFilenameName) {
+    media.sort((a, b) => a.fileName.localeCompare(b.fileName));
+    const labelFromFile = displayNameFromFilename(media[0]!.fileName);
+    const pretty = labelFromFile ?? fk;
+    albums.push({
+      nameKey: `__file__${fk}`,
+      displayName: `Photos from ${pretty}`,
+      submissions: [],
+      media,
+      fromFilenameOnly: true,
+    });
+  }
+
+  albums.sort((a, b) => {
+    const af = a.fromFilenameOnly ? 1 : 0;
+    const bf = b.fromFilenameOnly ? 1 : 0;
+    if (af !== bf) return af - bf;
+    return a.displayName.localeCompare(b.displayName);
+  });
 
   unmatchedMedia.sort((a, b) => a.fileName.localeCompare(b.fileName));
 
-  const keysWithMedia = new Set(albums.map((a) => a.nameKey));
+  const keysWithFormMedia = new Set(
+    people.filter((p) => byPerson.get(p.key)?.length).map((p) => p.key),
+  );
 
   const storiesWithoutMedia: MemoryStory[] = people
-    .filter((g) => !keysWithMedia.has(g.key))
+    .filter((g) => !keysWithFormMedia.has(g.key))
     .map((g) => ({
       displayName: g.displayName,
       nameKey: g.key,

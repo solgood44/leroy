@@ -1,6 +1,6 @@
 # LeRoy — memories
 
-A simple Next.js site: **photos and videos** from `public/memories/` are **grouped by person** and shown with their **full Google Form submission(s)** in `data/memories/submissions.csv`, when filenames match the name they used on the form.
+A simple Next.js site: **photos and videos** from `public/memories/` are **grouped by person**. If they’re on the Google Form CSV, their notes appear; if not, the heading is **Photos from [name]** using the name parsed from the filename.
 
 ## Update the content
 

@@ -12,12 +12,8 @@ function stripExtension(filename: string): string {
   return base.replace(/\.[^.]+$/, "");
 }
 
-/**
- * Dropbox / phone export filenames often look like:
- * `IMG_4413 Millicent Wibert.jpeg`, `20241226_113113_6181F8 Kurstin Shalawylo.mp4`, UUID + name, etc.
- * Pull out the trailing human name for matching.
- */
-export function nameHintFromFilename(filename: string): string {
+/** Tokens from the filename that look like a person’s name (camera noise stripped). */
+export function filenameKeptNameParts(filename: string): string[] {
   const base = stripExtension(filename.replace(/^.*\//, ""));
   const parts = base.trim().split(/\s+/).filter(Boolean);
   const kept: string[] = [];
@@ -35,10 +31,34 @@ export function nameHintFromFilename(filename: string): string {
   while (kept.length && /^\(\d+\)$/.test(kept[kept.length - 1]!)) {
     kept.pop();
   }
+  return kept;
+}
+
+/**
+ * Dropbox / phone export filenames often look like:
+ * `IMG_4413 Millicent Wibert.jpeg`, `20241226_113113_6181F8 Kurstin Shalawylo.mp4`, UUID + name, etc.
+ * Pull out the trailing human name for matching.
+ */
+export function nameHintFromFilename(filename: string): string {
+  const kept = filenameKeptNameParts(filename);
   if (kept.length >= 2) {
     return kept.slice(-2).join(" ");
   }
   return kept.join(" ");
+}
+
+/**
+ * Human-readable name from the file (original casing), or null if we can’t parse one.
+ */
+export function displayNameFromFilename(filename: string): string | null {
+  const kept = filenameKeptNameParts(filename);
+  if (kept.length >= 2) {
+    return kept.slice(-2).join(" ");
+  }
+  if (kept.length === 1 && kept[0]!.length > 2) {
+    return kept[0]!;
+  }
+  return null;
 }
 
 function lastFirstAligned(hint: string, formName: string): number {

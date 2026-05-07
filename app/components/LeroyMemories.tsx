@@ -145,7 +145,12 @@ function PersonAlbumCard({
         ))}
       </div>
       <div className="leroy-card-body">
-        {hasMessage ? (
+        {album.fromFilenameOnly ? (
+          <p className="leroy-hint">
+            No note on the form—we’re only showing the name from the Dropbox
+            filename.
+          </p>
+        ) : hasMessage ? (
           <>
             <button
               type="button"
@@ -174,7 +179,9 @@ function PersonAlbumCard({
               <p className="leroy-preview">{excerpt(combined)}</p>
             )}
           </>
-        ) : null}
+        ) : (
+          <p className="leroy-hint">No message text on the form for this person.</p>
+        )}
       </div>
     </article>
   );
@@ -220,9 +227,8 @@ function UnmatchedCard({
         <h2 className="leroy-card-name">Unmatched file</h2>
         <p className="leroy-card-file">{file.fileName}</p>
         <p className="leroy-hint">
-          We couldn’t match this to a name on the form. Rename the file to
-          include their first and last name (as they signed), then refresh the
-          data.
+          Add something like <strong>Firstname Lastname</strong> to the filename
+          so we can show a &quot;Photos from…&quot; card.
         </p>
       </div>
     </article>
@@ -350,9 +356,9 @@ export function LeroyMemories() {
         <h1>LeRoy Harvey</h1>
         <p className="tag">Memories from people who love you</p>
         <p className="lede">
-          Each person&apos;s <strong>photos and clips are grouped together</strong>{" "}
-          with everything they wrote on the form. Open any thumbnail to view it
-          larger.
+          Photos and clips are grouped by person. When someone wrote on the
+          form, you&apos;ll see their notes; otherwise we still show{" "}
+          <strong>Photos from…</strong> using the name in the Dropbox filename.
         </p>
       </header>
 
@@ -400,10 +406,10 @@ export function LeroyMemories() {
 
           {filteredUnmatched.length > 0 ? (
             <section className="leroy-unmatched" aria-label="Unmatched files">
-              <h2 className="leroy-section-title">Unmatched files</h2>
+              <h2 className="leroy-section-title">Couldn’t read a name</h2>
               <p className="leroy-section-sub">
-                These weren&apos;t linked to a form name—check spelling against
-                &quot;First and Last Name&quot; on the sheet.
+                These files don&apos;t match the form and don&apos;t include a
+                clear first and last name in the filename—rename if you can.
               </p>
               <div className="leroy-grid">
                 {filteredUnmatched.map((file) => (
