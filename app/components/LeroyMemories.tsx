@@ -513,8 +513,8 @@ export function LeroyMemories() {
           className="leroy-hero-photo"
           src="/leroy-hero.jpeg"
           alt="LeRoy Harvey"
-          width={4032}
-          height={3024}
+          width={2048}
+          height={1536}
           decoding="async"
           fetchPriority="high"
         />

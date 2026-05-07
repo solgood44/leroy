@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync:memories": "tsx scripts/sync-memories.ts"
+    "sync:memories": "tsx scripts/sync-memories.ts",
+    "optimize:memories": "tsx scripts/optimize-memory-images.ts"
   },
   "dependencies": {
     "next": "16.2.5",
@@ -18,14 +19,15 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "dotenv": "^16.4.7",
-    "tsx": "^4.19.3",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
     "eslint": "^9",
     "eslint-config-next": "16.2.5",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "tsx": "^4.19.3",
     "typescript": "^5"
   }
 }
