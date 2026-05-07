@@ -151,45 +151,44 @@ function PersonAlbumCard({
           />
         ))}
       </div>
-      <div className="leroy-card-body">
-        {album.fromFilenameOnly ? (
-          <p className="leroy-hint">
-            No note on the form—we’re only showing the name from the Dropbox
-            filename.
-          </p>
-        ) : hasMessage ? (
-          <>
-            <button
-              type="button"
-              className="leroy-toggle"
-              onClick={() => setOpen((v) => !v)}
-              aria-expanded={open}
-            >
-              {open ? "Hide notes from the form" : "Read notes from the form"}
-            </button>
-            {open ? (
-              <div className="leroy-messages">
-                {album.submissions.map((s, i) => (
-                  <blockquote
-                    key={`${s.timestamp}-${i}`}
-                    className="leroy-quote"
-                  >
-                    {s.message.trim() ? <p>{s.message}</p> : null}
-                    <footer>
-                      {s.name.trim() ? `${s.name} · ` : null}
-                      {s.timestamp}
-                    </footer>
-                  </blockquote>
-                ))}
-              </div>
-            ) : (
-              <p className="leroy-preview">{excerpt(combined)}</p>
-            )}
-          </>
-        ) : (
-          <p className="leroy-hint">No message text on the form for this person.</p>
-        )}
-      </div>
+      {!album.fromFilenameOnly ? (
+        <div className="leroy-card-body">
+          {hasMessage ? (
+            <>
+              <button
+                type="button"
+                className="leroy-toggle"
+                onClick={() => setOpen((v) => !v)}
+                aria-expanded={open}
+              >
+                {open ? "Hide notes from the form" : "Read notes from the form"}
+              </button>
+              {open ? (
+                <div className="leroy-messages">
+                  {album.submissions.map((s, i) => (
+                    <blockquote
+                      key={`${s.timestamp}-${i}`}
+                      className="leroy-quote"
+                    >
+                      {s.message.trim() ? <p>{s.message}</p> : null}
+                      <footer>
+                        {s.name.trim() ? `${s.name} · ` : null}
+                        {s.timestamp}
+                      </footer>
+                    </blockquote>
+                  ))}
+                </div>
+              ) : (
+                <p className="leroy-preview">{excerpt(combined)}</p>
+              )}
+            </>
+          ) : (
+            <p className="leroy-hint">
+              No message text on the form for this person.
+            </p>
+          )}
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -301,7 +300,8 @@ function FamilyUpdatePanel() {
       {!expanded ? (
         <p className="leroy-update-teaser">
           Tap above for a note from Molly &amp; Solomon about Dad—hospice at
-          home, how he&apos;s doing, and how to stay in touch.
+          home, how he&apos;s doing, and how to stay in touch. Keep an eye on
+          this section; we&apos;ll add more to the letter here when we can.
         </p>
       ) : null}
       <div id="update-body" className="leroy-update-body" hidden={!expanded}>
@@ -340,8 +340,9 @@ function FamilyUpdatePanel() {
           </p>
           <p>
             We&apos;re not yet sure what the next steps will be, but for now
-            we&apos;re focused on being present with him and will keep this
-            webpage updated as we&apos;re able.
+            we&apos;re focused on being present with him. We&apos;ll post new
+            updates in the family letter at the top of this page as we&apos;re
+            able.
           </p>
           <p>
             If you&apos;d like to reach out, he&apos;s open to emails at{" "}
@@ -442,6 +443,25 @@ function QuickActions() {
             </span>
           </a>
         </li>
+        <li>
+          <a
+            className="leroy-action-card"
+            href={LINKS.emailLeRoy}
+          >
+            <span className="leroy-action-icon" aria-hidden>
+              📧
+            </span>
+            <span className="leroy-action-text">
+              <span className="leroy-action-title">Email LeRoy</span>
+              <span className="leroy-action-desc">
+                harvey48823@gmail.com — opens your mail app
+              </span>
+            </span>
+            <span className="leroy-action-arrow" aria-hidden>
+              →
+            </span>
+          </a>
+        </li>
       </ul>
     </nav>
   );
@@ -488,8 +508,22 @@ export function LeroyMemories() {
   return (
     <div className="leroy-page">
       <header className="leroy-hero">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="leroy-hero-photo"
+          src="/leroy-hero.jpeg"
+          alt="LeRoy Harvey"
+          width={4032}
+          height={3024}
+          decoding="async"
+          fetchPriority="high"
+        />
         <h1>LeRoy Harvey</h1>
         <p className="tag">A place for memories, photos, and words of love</p>
+        <p className="leroy-hero-email">
+          You can also reach him by email at{" "}
+          <a href={LINKS.emailLeRoy}>harvey48823@gmail.com</a>.
+        </p>
       </header>
 
       <QuickActions />
@@ -514,7 +548,10 @@ export function LeroyMemories() {
               Below are pictures and clips people have shared, grouped by person.
               When someone used the message form, you&apos;ll see their note;
               otherwise you may see{" "}
-              <strong>Photos from…</strong> using the name on the file.
+              <strong>Photos from…</strong> using the name on the file. For
+              news from the family, check{" "}
+              <strong>Updates from Sol &amp; Mol</strong> above—we&apos;ll add
+              more there when we can.
             </p>
             <p className="leroy-thanks">
               Thank you for all the sweet messages and photos—we&apos;ve been
