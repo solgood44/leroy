@@ -15,9 +15,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "LeRoy Harvey — memories",
+  title: "LeRoy Harvey — memories & updates",
   description:
-    "Photos, videos, and words from family and friends for LeRoy Harvey.",
+    "Family updates, photos, and messages for LeRoy Harvey. Leave a note, share a photo, or read words from friends and family.",
 };
 
 export default function RootLayout({

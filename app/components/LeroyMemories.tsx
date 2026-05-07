@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type {
   MemoriesPayload,
   MemoryFile,
@@ -13,6 +13,13 @@ function excerpt(text: string, max = 200): string {
   if (t.length <= max) return t;
   return `${t.slice(0, max).trim()}…`;
 }
+
+const LINKS = {
+  messageForm: "https://forms.gle/C2htuJ35AatoW2rh8",
+  dropboxUpload: "https://www.dropbox.com/request/s6bnleq9kf4agf37k1bf",
+  facebookPost: "https://www.facebook.com/share/p/17HpPURTMR/",
+  emailLeRoy: "mailto:harvey48823@gmail.com",
+} as const;
 
 function Lightbox({
   item,
@@ -266,20 +273,183 @@ function LetterCard({ story }: { story: MemoryStory }) {
   );
 }
 
-function albumSearchBlob(a: PersonAlbum): string {
-  return [
-    a.displayName,
-    ...a.media.map((m) => m.fileName),
-    ...a.submissions.flatMap((s) => [s.name, s.message]),
-  ]
-    .join(" ")
-    .toLowerCase();
+function FamilyUpdatePanel() {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <section
+      className="leroy-update"
+      aria-label="Family update from Molly and Solomon"
+    >
+      <button
+        type="button"
+        className="leroy-update-trigger"
+        onClick={() => setExpanded((e) => !e)}
+        aria-expanded={expanded}
+        aria-controls="update-body"
+      >
+        <span className="leroy-update-trigger-main">
+          <span className="leroy-update-badge">Family update</span>
+          <span className="leroy-update-trigger-title">
+            Updates from Sol &amp; Mol
+          </span>
+        </span>
+        <span className="leroy-update-chevron" aria-hidden>
+          {expanded ? "−" : "+"}
+        </span>
+      </button>
+      {!expanded ? (
+        <p className="leroy-update-teaser">
+          Tap above for a note from Molly &amp; Solomon about Dad—hospice at
+          home, how he&apos;s doing, and how to stay in touch.
+        </p>
+      ) : null}
+      <div id="update-body" className="leroy-update-body" hidden={!expanded}>
+        <div className="leroy-update-letter">
+          <p className="leroy-update-salutation">Dear friends and family,</p>
+          <p>
+            We wanted to share an update about our dad, LeRoy Harvey. He was
+            admitted to the hospital last week after some confusion, and recent
+            MRI scans showed changes in his brain that have shifted things more
+            quickly than we expected. For now, he has chosen to transition back
+            home with hospice comfort care to focus on peace, comfort, and
+            quality of life. We want to reiterate that hospice does not
+            necessarily mean end of life, but simply a desire to avoid aggressive
+            treatments and debilitating side effects.
+          </p>
+          <p>
+            We&apos;re taking things one day at a time and don&apos;t know
+            exactly what the coming days will look like. What we do know is that
+            he is being cared for by a wonderful team, and we&apos;ve been
+            grateful to be by his side. True to who he is, his kindness and
+            spirit are shining through in meaningful ways.
+          </p>
+          <p>
+            Over the past year and a half, he&apos;s continued to live fully
+            after the previous surgery—staying active, connecting with others,
+            playing music, and sharing in community. That sense of connection
+            has always meant so much to him, and it continues to now.
+          </p>
+          <p>
+            When we asked what he&apos;d want to share with you all, he simply
+            said:{" "}
+            <em>
+              I&apos;d love to hear what&apos;s going well with everyone, stay
+              connected with one another, and keep the conversation going.
+            </em>
+          </p>
+          <p>
+            We&apos;re not yet sure what the next steps will be, but for now
+            we&apos;re focused on being present with him and will keep this
+            webpage updated as we&apos;re able.
+          </p>
+          <p>
+            If you&apos;d like to reach out, he&apos;s open to emails at{" "}
+            <a href={LINKS.emailLeRoy}>harvey48823@gmail.com</a>. In the last few
+            days there have been improvements in his mental state and he is
+            able to have conversations. He is also looking forward to getting
+            home and getting back to some sense of normalcy. You can also reach
+            out to us directly. We appreciate your patience as we do our best
+            to respond.
+          </p>
+          <p>
+            We feel truly blessed for the outpouring of support and love that
+            our family has received in the past week—it truly means a lot.
+          </p>
+          <p className="leroy-update-signoff">
+            With love,
+            <br />
+            Molly and Solomon &lt;3
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function QuickActions() {
+  return (
+    <nav className="leroy-actions" aria-label="Ways to connect">
+      <h2 className="leroy-actions-heading">Ways to reach out</h2>
+      <p className="leroy-actions-sub">
+        Pick what works for you—each link opens in a new tab.
+      </p>
+      <ul className="leroy-actions-list">
+        <li>
+          <a
+            className="leroy-action-card"
+            href={LINKS.messageForm}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="leroy-action-icon" aria-hidden>
+              ✉️
+            </span>
+            <span className="leroy-action-text">
+              <span className="leroy-action-title">Leave a message for LeRoy</span>
+              <span className="leroy-action-desc">
+                Short form—share what&apos;s going well or a note of support
+              </span>
+            </span>
+            <span className="leroy-action-arrow" aria-hidden>
+              →
+            </span>
+          </a>
+        </li>
+        <li>
+          <a
+            className="leroy-action-card"
+            href={LINKS.dropboxUpload}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="leroy-action-icon" aria-hidden>
+              🖼️
+            </span>
+            <span className="leroy-action-text">
+              <span className="leroy-action-title">
+                Upload a photo or video
+              </span>
+              <span className="leroy-action-desc">
+                Dropbox file request—no account needed
+              </span>
+            </span>
+            <span className="leroy-action-arrow" aria-hidden>
+              →
+            </span>
+          </a>
+        </li>
+        <li>
+          <a
+            className="leroy-action-card"
+            href={LINKS.facebookPost}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="leroy-action-icon" aria-hidden>
+              💬
+            </span>
+            <span className="leroy-action-text">
+              <span className="leroy-action-title">
+                Write on LeRoy&apos;s Facebook post
+              </span>
+              <span className="leroy-action-desc">
+                Join the conversation there if you use Facebook
+              </span>
+            </span>
+            <span className="leroy-action-arrow" aria-hidden>
+              →
+            </span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  );
 }
 
 export function LeroyMemories() {
   const [data, setData] = useState<MemoriesPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
   const [lightbox, setLightbox] = useState<{
     url: string;
     kind: "image" | "video";
@@ -313,54 +483,18 @@ export function LeroyMemories() {
     };
   }, []);
 
-  const q = query.trim().toLowerCase();
-
-  const filteredAlbums = useMemo(() => {
-    if (!data?.albums) return [];
-    if (!q) return data.albums;
-    return data.albums.filter((a) => albumSearchBlob(a).includes(q));
-  }, [data, q]);
-
-  const filteredUnmatched = useMemo(() => {
-    if (!data?.unmatchedMedia) return [];
-    if (!q) return data.unmatchedMedia;
-    return data.unmatchedMedia.filter((f) =>
-      f.fileName.toLowerCase().includes(q),
-    );
-  }, [data, q]);
-
-  const filteredLetters = useMemo(() => {
-    if (!data?.storiesWithoutMedia) return [];
-    if (!q) return data.storiesWithoutMedia;
-    return data.storiesWithoutMedia.filter((s) => {
-      const blob = [
-        s.displayName,
-        ...s.submissions.flatMap((x) => [x.message, x.name]),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return blob.includes(q);
-    });
-  }, [data, q]);
-
   const closeLb = useCallback(() => setLightbox(null), []);
-
-  const hasResults =
-    filteredAlbums.length > 0 ||
-    filteredUnmatched.length > 0 ||
-    filteredLetters.length > 0;
 
   return (
     <div className="leroy-page">
       <header className="leroy-hero">
         <h1>LeRoy Harvey</h1>
-        <p className="tag">Memories from people who love you</p>
-        <p className="lede">
-          Photos and clips are grouped by person. When someone wrote on the
-          form, you&apos;ll see their notes; otherwise we still show{" "}
-          <strong>Photos from…</strong> using the name in the Dropbox filename.
-        </p>
+        <p className="tag">A place for memories, photos, and words of love</p>
       </header>
+
+      <QuickActions />
+
+      <FamilyUpdatePanel />
 
       {error ? (
         <p className="leroy-banner leroy-banner--error" role="alert">
@@ -369,30 +503,24 @@ export function LeroyMemories() {
       ) : null}
 
       {!data && !error ? (
-        <p className="leroy-loading">Loading…</p>
+        <p className="leroy-loading">Loading photos and messages…</p>
       ) : null}
 
       {data ? (
         <>
-          <div className="leroy-search">
-            <label htmlFor="q">Search</label>
-            <input
-              id="q"
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Name or a word from a note"
-              autoComplete="off"
-            />
-          </div>
+          <section className="leroy-gallery-intro" aria-label="About this gallery">
+            <h2 className="leroy-section-title">Photos &amp; messages</h2>
+            <p className="leroy-section-sub">
+              Below are pictures and clips people have shared, grouped by person.
+              When someone used the message form, you&apos;ll see their note;
+              otherwise you may see{" "}
+              <strong>Photos from…</strong> using the name on the file.
+            </p>
+          </section>
 
-          {!hasResults ? (
-            <p className="leroy-empty">Nothing matches that search.</p>
-          ) : null}
-
-          {filteredAlbums.length > 0 ? (
+          {data.albums.length > 0 ? (
             <div className="leroy-grid">
-              {filteredAlbums.map((album) => (
+              {data.albums.map((album) => (
                 <PersonAlbumCard
                   key={album.nameKey}
                   album={album}
@@ -404,15 +532,15 @@ export function LeroyMemories() {
             </div>
           ) : null}
 
-          {filteredUnmatched.length > 0 ? (
+          {data.unmatchedMedia.length > 0 ? (
             <section className="leroy-unmatched" aria-label="Unmatched files">
               <h2 className="leroy-section-title">Couldn’t read a name</h2>
               <p className="leroy-section-sub">
                 These files don&apos;t match the form and don&apos;t include a
-                clear first and last name in the filename—rename if you can.
+                clear first and last name in the filename.
               </p>
               <div className="leroy-grid">
-                {filteredUnmatched.map((file) => (
+                {data.unmatchedMedia.map((file) => (
                   <UnmatchedCard
                     key={file.id}
                     file={file}
@@ -425,14 +553,14 @@ export function LeroyMemories() {
             </section>
           ) : null}
 
-          {filteredLetters.length > 0 ? (
+          {data.storiesWithoutMedia.length > 0 ? (
             <section className="leroy-letters" aria-label="Notes without media">
               <h2>Notes without a matched photo</h2>
               <p className="sub">
                 We didn&apos;t find files for these names—only what they wrote.
               </p>
               <div className="leroy-letters-grid">
-                {filteredLetters.map((s) => (
+                {data.storiesWithoutMedia.map((s) => (
                   <LetterCard key={s.nameKey} story={s} />
                 ))}
               </div>
@@ -440,7 +568,7 @@ export function LeroyMemories() {
           ) : null}
 
           <footer className="leroy-footer">
-            Made with care ·{" "}
+            Page updated ·{" "}
             {new Date(data.generatedAt).toLocaleDateString(undefined, {
               year: "numeric",
               month: "long",
