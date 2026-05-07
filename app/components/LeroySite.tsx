@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { MemoryGallery } from "./MemoryGallery";
 
 const SECTION_IDS = [
   "green",
@@ -50,6 +51,8 @@ export function LeroySite() {
     const fromHash = normalizeSection(
       typeof window !== "undefined" ? window.location.hash : "",
     );
+    // Hash is unavailable on the server; sync once on mount + on hashchange.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hash-driven section for static home page
     setActive(fromHash);
     applyBodySection(fromHash);
 
@@ -413,45 +416,8 @@ export function LeroySite() {
             </svg>
           </div>
           <div className="card-body">
-            <h2>Photos</h2>
-            <p className="card-desc">
-              Add images in <code>public/gallery/</code> and swap these
-              placeholders when you are ready.
-            </p>
-            <div className="gallery">
-              <figure>
-                <div className="gallery-placeholder" aria-hidden="true">
-                  Molly and I
-                </div>
-                <figcaption>Molly and I</figcaption>
-              </figure>
-              <figure>
-                <div className="gallery-placeholder" aria-hidden="true">
-                  Whoa, Nelly! & Friends
-                </div>
-                <figcaption>Whoa, Nelly! & Friends</figcaption>
-              </figure>
-              <figure>
-                <div className="gallery-placeholder" aria-hidden="true">
-                  Family
-                </div>
-                <figcaption>A few family folk…</figcaption>
-              </figure>
-              <figure>
-                <div className="gallery-placeholder" aria-hidden="true">
-                  Acoustic Liberty
-                </div>
-                <figcaption>
-                  Acoustic Liberty — Ron, Peter, Diane, LeRoy & Valerie
-                </figcaption>
-              </figure>
-              <figure>
-                <div className="gallery-placeholder" aria-hidden="true">
-                  Solomon and I
-                </div>
-                <figcaption>Solomon and I</figcaption>
-              </figure>
-            </div>
+            <h2>Photos &amp; messages</h2>
+            <MemoryGallery />
           </div>
         </section>
       </main>
