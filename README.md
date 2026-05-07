@@ -1,6 +1,6 @@
 # LeRoy — memories
 
-A simple Next.js site: **photos and videos** from `public/memories/` paired with **Google Form responses** in `data/memories/submissions.csv`, when the filename includes a name that matches the form.
+A simple Next.js site: **photos and videos** from `public/memories/` are **grouped by person** and shown with their **full Google Form submission(s)** in `data/memories/submissions.csv`, when filenames match the name they used on the form.
 
 ## Update the content
 

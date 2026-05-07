@@ -3,14 +3,20 @@ import { join } from "path";
 import { groupSubmissionsByPerson, parseFormSheetCsv } from "./sheet";
 import { pickBestPersonMatch, type ScoredPerson } from "./nameMatch";
 
-export type MemoryMedia = {
+/** One image or video file (no form text — that lives on the person album). */
+export type MemoryFile = {
   id: string;
   fileName: string;
   url: string;
   kind: "image" | "video";
-  matchedName: string | null;
-  matchScore: number | null;
+};
+
+/** All media from people who matched the form, grouped with their submissions. */
+export type PersonAlbum = {
+  nameKey: string;
+  displayName: string;
   submissions: import("./sheet").SheetSubmission[];
+  media: MemoryFile[];
 };
 
 export type MemoryStory = {
@@ -22,7 +28,10 @@ export type MemoryStory = {
 
 export type MemoriesPayload = {
   generatedAt: string;
-  items: MemoryMedia[];
+  /** One entry per person who has at least one matched photo/video */
+  albums: PersonAlbum[];
+  /** Files we couldn’t tie to a form name */
+  unmatchedMedia: MemoryFile[];
   storiesWithoutMedia: MemoryStory[];
 };
 
@@ -82,7 +91,9 @@ export async function buildMemories(): Promise<MemoriesPayload> {
   }));
 
   const files = await listMemoryMedia();
-  const items: MemoryMedia[] = [];
+
+  const byPerson = new Map<string, MemoryFile[]>();
+  const unmatchedMedia: MemoryFile[] = [];
 
   for (const { relPath, baseName } of files) {
     const match = pickBestPersonMatch(baseName, scoredPeople, 55);
@@ -90,26 +101,43 @@ export async function buildMemories(): Promise<MemoriesPayload> {
       ? people.find((p) => p.key === match.person.key)
       : undefined;
 
-    items.push({
+    const file: MemoryFile = {
       id: relPath,
       fileName: relPath,
       url: publicUrlForMemory(relPath),
       kind: VIDEO_RE.test(baseName) ? "video" : "image",
-      matchedName: match ? group?.displayName ?? match.person.displayName : null,
-      matchScore: match?.score ?? null,
-      submissions: group?.submissions ?? [],
-    });
-  }
+    };
 
-  const mediaMatchedKeys = new Set<string>();
-  for (const item of items) {
-    for (const s of item.submissions) {
-      mediaMatchedKeys.add(s.nameKey);
+    if (match && group) {
+      const key = group.key;
+      if (!byPerson.has(key)) byPerson.set(key, []);
+      byPerson.get(key)!.push(file);
+    } else {
+      unmatchedMedia.push(file);
     }
   }
 
+  const albums: PersonAlbum[] = [];
+  for (const p of people) {
+    const media = byPerson.get(p.key);
+    if (!media?.length) continue;
+    media.sort((a, b) => a.fileName.localeCompare(b.fileName));
+    albums.push({
+      nameKey: p.key,
+      displayName: p.displayName,
+      submissions: p.submissions,
+      media,
+    });
+  }
+
+  albums.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+  unmatchedMedia.sort((a, b) => a.fileName.localeCompare(b.fileName));
+
+  const keysWithMedia = new Set(albums.map((a) => a.nameKey));
+
   const storiesWithoutMedia: MemoryStory[] = people
-    .filter((g) => !mediaMatchedKeys.has(g.key))
+    .filter((g) => !keysWithMedia.has(g.key))
     .map((g) => ({
       displayName: g.displayName,
       nameKey: g.key,
@@ -119,16 +147,18 @@ export async function buildMemories(): Promise<MemoriesPayload> {
 
   return {
     generatedAt: new Date().toISOString(),
-    items: items.sort((a, b) => {
-      const an = a.matchedName ?? a.fileName;
-      const bn = b.matchedName ?? b.fileName;
-      const c = an.localeCompare(bn);
-      if (c !== 0) return c;
-      return a.fileName.localeCompare(b.fileName);
-    }),
+    albums,
+    unmatchedMedia,
     storiesWithoutMedia,
   };
 }
 
-/** @deprecated use MemoryMedia */
+/** @deprecated */
+export type MemoryMedia = MemoryFile & {
+  matchedName?: string | null;
+  matchScore?: number | null;
+  submissions?: import("./sheet").SheetSubmission[];
+};
+
+/** @deprecated */
 export type MemoryPhoto = MemoryMedia;

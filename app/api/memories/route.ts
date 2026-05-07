@@ -4,7 +4,7 @@ import { buildMemories } from "@/lib/memories";
 
 const getMemories = unstable_cache(
   async () => buildMemories(),
-  ["leroy-memories-local-v3"],
+  ["leroy-memories-local-v4"],
   { revalidate: 300 },
 );
 

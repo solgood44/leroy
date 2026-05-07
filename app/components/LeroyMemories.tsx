@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   MemoriesPayload,
-  MemoryMedia,
+  MemoryFile,
   MemoryStory,
+  PersonAlbum,
 } from "@/lib/memories";
 
 function excerpt(text: string, max = 200): string {
@@ -69,48 +70,81 @@ function Lightbox({
   );
 }
 
-function MediaCard({
-  item,
+function Thumb({
+  file,
+  personLabel,
   onOpen,
 }: {
-  item: MemoryMedia;
+  file: MemoryFile;
+  personLabel: string;
+  onOpen: (url: string, kind: "image" | "video", label: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="leroy-album-thumb-btn"
+      onClick={() =>
+        onOpen(file.url, file.kind, `${personLabel} — ${file.fileName}`)
+      }
+      aria-label={`Open ${file.fileName}`}
+    >
+      {file.kind === "video" ? (
+        <video
+          src={file.url}
+          className="leroy-album-thumb"
+          muted
+          playsInline
+          preload="metadata"
+        />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={file.url}
+          alt=""
+          className="leroy-album-thumb"
+          loading="lazy"
+          decoding="async"
+        />
+      )}
+    </button>
+  );
+}
+
+function PersonAlbumCard({
+  album,
+  onOpen,
+}: {
+  album: PersonAlbum;
   onOpen: (url: string, kind: "image" | "video", label: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const title = item.matchedName ?? "From friends & family";
-  const hasMessage = item.submissions.some((s) => s.message.trim());
-  const combined = item.submissions.map((s) => s.message).join("\n\n");
+  const hasMessage = album.submissions.some((s) => s.message.trim());
+  const combined = album.submissions.map((s) => s.message).join("\n\n");
+  const n = album.media.length;
+  const countLabel =
+    n === 1 ? "1 photo / clip" : `${n} photos & clips`;
 
   return (
-    <article className="leroy-card">
-      <button
-        type="button"
-        className="leroy-card-media-btn"
-        onClick={() => onOpen(item.url, item.kind, `${title} — ${item.fileName}`)}
-        aria-label={`Open ${item.fileName}`}
+    <article className="leroy-card leroy-card--album">
+      <div className="leroy-card-body leroy-card-body--album-top">
+        <h2 className="leroy-card-name">{album.displayName}</h2>
+        <p className="leroy-album-count">{countLabel}</p>
+      </div>
+      <div
+        className="leroy-album-media"
+        role="list"
+        aria-label={`Media from ${album.displayName}`}
       >
-        {item.kind === "video" ? (
-          <video
-            src={item.url}
-            className="leroy-card-video"
-            muted
-            playsInline
-            preload="metadata"
+        {album.media.map((file) => (
+          <Thumb
+            key={file.id}
+            file={file}
+            personLabel={album.displayName}
+            onOpen={onOpen}
           />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.url}
-            alt=""
-            className="leroy-card-img"
-            loading="lazy"
-            decoding="async"
-          />
-        )}
-      </button>
+        ))}
+      </div>
       <div className="leroy-card-body">
-        <h2 className="leroy-card-name">{title}</h2>
-        <p className="leroy-card-file">{item.fileName}</p>
         {hasMessage ? (
           <>
             <button
@@ -119,12 +153,15 @@ function MediaCard({
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
             >
-              {open ? "Hide note" : "Read note"}
+              {open ? "Hide notes from the form" : "Read notes from the form"}
             </button>
             {open ? (
               <div className="leroy-messages">
-                {item.submissions.map((s, i) => (
-                  <blockquote key={`${s.timestamp}-${i}`} className="leroy-quote">
+                {album.submissions.map((s, i) => (
+                  <blockquote
+                    key={`${s.timestamp}-${i}`}
+                    className="leroy-quote"
+                  >
                     {s.message.trim() ? <p>{s.message}</p> : null}
                     <footer>
                       {s.name.trim() ? `${s.name} · ` : null}
@@ -137,13 +174,56 @@ function MediaCard({
               <p className="leroy-preview">{excerpt(combined)}</p>
             )}
           </>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function UnmatchedCard({
+  file,
+  onOpen,
+}: {
+  file: MemoryFile;
+  onOpen: (url: string, kind: "image" | "video", label: string) => void;
+}) {
+  return (
+    <article className="leroy-card">
+      <button
+        type="button"
+        className="leroy-card-media-btn"
+        onClick={() =>
+          onOpen(file.url, file.kind, `Unmatched — ${file.fileName}`)
+        }
+        aria-label={`Open ${file.fileName}`}
+      >
+        {file.kind === "video" ? (
+          <video
+            src={file.url}
+            className="leroy-card-video"
+            muted
+            playsInline
+            preload="metadata"
+          />
         ) : (
-          <p className="leroy-hint">
-            No matching form name for this file. If you rename it to include
-            their first and last name (as on the form), the note will appear
-            here.
-          </p>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={file.url}
+            alt=""
+            className="leroy-card-img"
+            loading="lazy"
+            decoding="async"
+          />
         )}
+      </button>
+      <div className="leroy-card-body">
+        <h2 className="leroy-card-name">Unmatched file</h2>
+        <p className="leroy-card-file">{file.fileName}</p>
+        <p className="leroy-hint">
+          We couldn’t match this to a name on the form. Rename the file to
+          include their first and last name (as they signed), then refresh the
+          data.
+        </p>
       </div>
     </article>
   );
@@ -178,6 +258,16 @@ function LetterCard({ story }: { story: MemoryStory }) {
       )}
     </article>
   );
+}
+
+function albumSearchBlob(a: PersonAlbum): string {
+  return [
+    a.displayName,
+    ...a.media.map((m) => m.fileName),
+    ...a.submissions.flatMap((s) => [s.name, s.message]),
+  ]
+    .join(" ")
+    .toLowerCase();
 }
 
 export function LeroyMemories() {
@@ -217,25 +307,24 @@ export function LeroyMemories() {
     };
   }, []);
 
-  const filteredItems = useMemo(() => {
-    if (!data?.items) return [];
-    const q = query.trim().toLowerCase();
-    if (!q) return data.items;
-    return data.items.filter((p) => {
-      const blob = [
-        p.matchedName,
-        p.fileName,
-        ...p.submissions.flatMap((s) => [s.name, s.message]),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return blob.includes(q);
-    });
-  }, [data, query]);
+  const q = query.trim().toLowerCase();
+
+  const filteredAlbums = useMemo(() => {
+    if (!data?.albums) return [];
+    if (!q) return data.albums;
+    return data.albums.filter((a) => albumSearchBlob(a).includes(q));
+  }, [data, q]);
+
+  const filteredUnmatched = useMemo(() => {
+    if (!data?.unmatchedMedia) return [];
+    if (!q) return data.unmatchedMedia;
+    return data.unmatchedMedia.filter((f) =>
+      f.fileName.toLowerCase().includes(q),
+    );
+  }, [data, q]);
 
   const filteredLetters = useMemo(() => {
     if (!data?.storiesWithoutMedia) return [];
-    const q = query.trim().toLowerCase();
     if (!q) return data.storiesWithoutMedia;
     return data.storiesWithoutMedia.filter((s) => {
       const blob = [
@@ -246,9 +335,14 @@ export function LeroyMemories() {
         .toLowerCase();
       return blob.includes(q);
     });
-  }, [data, query]);
+  }, [data, q]);
 
   const closeLb = useCallback(() => setLightbox(null), []);
+
+  const hasResults =
+    filteredAlbums.length > 0 ||
+    filteredUnmatched.length > 0 ||
+    filteredLetters.length > 0;
 
   return (
     <div className="leroy-page">
@@ -256,9 +350,9 @@ export function LeroyMemories() {
         <h1>LeRoy Harvey</h1>
         <p className="tag">Memories from people who love you</p>
         <p className="lede">
-          Here are the photos and clips folks shared, alongside what they wrote
-          on the form—when we could match a name to a file. Below that are
-          notes we couldn’t tie to a picture yet.
+          Each person&apos;s <strong>photos and clips are grouped together</strong>{" "}
+          with everything they wrote on the form. Open any thumbnail to view it
+          larger.
         </p>
       </header>
 
@@ -286,28 +380,50 @@ export function LeroyMemories() {
             />
           </div>
 
-          {filteredItems.length === 0 ? (
-            <p className="leroy-empty">No photos or videos match that search.</p>
-          ) : (
+          {!hasResults ? (
+            <p className="leroy-empty">Nothing matches that search.</p>
+          ) : null}
+
+          {filteredAlbums.length > 0 ? (
             <div className="leroy-grid">
-              {filteredItems.map((item) => (
-                <MediaCard
-                  key={item.id}
-                  item={item}
+              {filteredAlbums.map((album) => (
+                <PersonAlbumCard
+                  key={album.nameKey}
+                  album={album}
                   onOpen={(url, kind, label) =>
                     setLightbox({ url, kind, label })
                   }
                 />
               ))}
             </div>
-          )}
+          ) : null}
+
+          {filteredUnmatched.length > 0 ? (
+            <section className="leroy-unmatched" aria-label="Unmatched files">
+              <h2 className="leroy-section-title">Unmatched files</h2>
+              <p className="leroy-section-sub">
+                These weren&apos;t linked to a form name—check spelling against
+                &quot;First and Last Name&quot; on the sheet.
+              </p>
+              <div className="leroy-grid">
+                {filteredUnmatched.map((file) => (
+                  <UnmatchedCard
+                    key={file.id}
+                    file={file}
+                    onOpen={(url, kind, label) =>
+                      setLightbox({ url, kind, label })
+                    }
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           {filteredLetters.length > 0 ? (
             <section className="leroy-letters" aria-label="Notes without media">
               <h2>Notes without a matched photo</h2>
               <p className="sub">
-                These messages didn’t match a filename—we still wanted them
-                here.
+                We didn&apos;t find files for these names—only what they wrote.
               </p>
               <div className="leroy-letters-grid">
                 {filteredLetters.map((s) => (
@@ -329,10 +445,7 @@ export function LeroyMemories() {
       ) : null}
 
       {lightbox ? (
-        <Lightbox
-          item={lightbox}
-          onClose={closeLb}
-        />
+        <Lightbox item={lightbox} onClose={closeLb} />
       ) : null}
     </div>
   );
