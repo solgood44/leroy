@@ -41,14 +41,16 @@ async function dropboxRpc<TBody extends object, TRes>(
 export async function listSharedFolderImages(
   token: string,
   sharedFolderUrl: string,
+  options?: { recursive?: boolean },
 ): Promise<DropboxImageFile[]> {
   const normalizedUrl = sharedFolderUrl.trim();
   const first = await dropboxRpc<
-    { path: string; shared_link: { url: string } },
+    { path: string; shared_link: { url: string }; recursive?: boolean },
     ListFolderResult
   >(token, "files/list_folder", {
     path: "",
     shared_link: { url: normalizedUrl },
+    recursive: options?.recursive ?? false,
   });
 
   const entries: ListFolderEntry[] = [...first.entries];

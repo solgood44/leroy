@@ -3,13 +3,8 @@ import { NextResponse } from "next/server";
 import { buildMemories } from "@/lib/memories";
 
 const getMemories = unstable_cache(
-  async () =>
-    buildMemories({
-      sheetCsvUrl: process.env.GOOGLE_SHEET_CSV_URL,
-      dropboxSharedFolderUrl: process.env.DROPBOX_SHARED_FOLDER_URL,
-      dropboxToken: process.env.DROPBOX_ACCESS_TOKEN,
-    }),
-  ["leroy-memories-v1"],
+  async () => buildMemories(),
+  ["leroy-memories-local-v2"],
   { revalidate: 300 },
 );
 

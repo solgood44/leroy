@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:memories": "tsx scripts/sync-memories.ts"
   },
   "dependencies": {
     "next": "16.2.5",
@@ -17,6 +18,8 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -1,4 +1,5 @@
-import { getTemporaryLinksBatched, listSharedFolderImages } from "./dropbox";
+import { readdir, readFile } from "fs/promises";
+import { join } from "path";
 import { groupSubmissionsByPerson, parseFormSheetCsv } from "./sheet";
 import { pickBestPersonMatch, type ScoredPerson } from "./nameMatch";
 
@@ -20,36 +21,63 @@ export type MemoryStory = {
 
 export type MemoriesPayload = {
   generatedAt: string;
-  sheetUrl: string;
-  dropboxConfigured: boolean;
-  dropboxError: string | null;
   photos: MemoryPhoto[];
   storiesWithoutPhoto: MemoryStory[];
 };
 
-const DEFAULT_SHEET_CSV =
-  "https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/export?format=csv&gid=253822378";
+const IMAGE_RE = /\.(jpe?g|png|gif|webp|heic|avif|bmp|tif?f)$/i;
 
-const DEFAULT_DROPBOX_FOLDER =
-  "https://www.dropbox.com/scl/fo/1rgt2ngvykre8yj0y5xzk/ALOX2PTKGs3zxPETDEuo_ns?rlkey=63no67lx3rt4pra4pwg75jfum&dl=0";
+const CSV_PATH = join(process.cwd(), "data", "memories", "submissions.csv");
+const MEMORIES_PUBLIC_DIR = join(process.cwd(), "public", "memories");
 
-export async function buildMemories(options?: {
-  sheetCsvUrl?: string;
-  dropboxSharedFolderUrl?: string;
-  dropboxToken?: string;
-}): Promise<MemoriesPayload> {
-  const sheetCsvUrl = options?.sheetCsvUrl?.trim() || DEFAULT_SHEET_CSV;
-  const dropboxSharedFolderUrl =
-    options?.dropboxSharedFolderUrl?.trim() || DEFAULT_DROPBOX_FOLDER;
-  const dropboxToken = options?.dropboxToken?.trim();
+async function listMemoryImages(): Promise<
+  { relPath: string; baseName: string }[]
+> {
+  async function walk(
+    dir: string,
+    prefix: string,
+  ): Promise<{ relPath: string; baseName: string }[]> {
+    const out: { relPath: string; baseName: string }[] = [];
+    let entries;
+    try {
+      entries = await readdir(dir, { withFileTypes: true });
+    } catch {
+      return out;
+    }
+    for (const e of entries) {
+      if (e.name.startsWith(".")) continue;
+      const rel = prefix ? `${prefix}/${e.name}` : e.name;
+      const full = join(dir, e.name);
+      if (e.isDirectory()) {
+        out.push(...(await walk(full, rel)));
+      } else if (e.isFile() && IMAGE_RE.test(e.name)) {
+        out.push({ relPath: rel, baseName: e.name });
+      }
+    }
+    return out;
+  }
+  return walk(MEMORIES_PUBLIC_DIR, "");
+}
 
-  const sheetRes = await fetch(sheetCsvUrl);
-  if (!sheetRes.ok) {
+function publicUrlForMemory(relPath: string): string {
+  return `/memories/${relPath.split("/").map(encodeURIComponent).join("/")}`;
+}
+
+/**
+ * Build gallery payload from committed files:
+ * - `data/memories/submissions.csv` (form responses)
+ * - `public/memories/**` (images)
+ */
+export async function buildMemories(): Promise<MemoriesPayload> {
+  let csvText: string;
+  try {
+    csvText = await readFile(CSV_PATH, "utf8");
+  } catch {
     throw new Error(
-      `Google Sheet CSV fetch failed (${sheetRes.status}). Is the sheet shared as “Anyone with the link can view”?`,
+      "Missing data/memories/submissions.csv. Run: npm run sync:memories",
     );
   }
-  const csvText = await sheetRes.text();
+
   const rows = parseFormSheetCsv(csvText);
   const people = groupSubmissionsByPerson(rows);
 
@@ -58,35 +86,23 @@ export async function buildMemories(options?: {
     displayName: p.displayName,
   }));
 
+  const imageFiles = await listMemoryImages();
   const photos: MemoryPhoto[] = [];
-  let dropboxError: string | null = null;
-  let dropboxConfigured = Boolean(dropboxToken);
 
-  if (dropboxToken) {
-    try {
-      const files = await listSharedFolderImages(dropboxToken, dropboxSharedFolderUrl);
-      const links = await getTemporaryLinksBatched(dropboxToken, files, 8);
+  for (const { relPath, baseName } of imageFiles) {
+    const match = pickBestPersonMatch(baseName, scoredPeople, 55);
+    const group = match
+      ? people.find((p) => p.key === match.person.key)
+      : undefined;
 
-      for (const f of files) {
-        const url = links.get(f.pathLower) ?? "";
-        const match = pickBestPersonMatch(f.name, scoredPeople, 55);
-        const group = match
-          ? people.find((p) => p.key === match.person.key)
-          : undefined;
-
-        photos.push({
-          id: f.pathLower,
-          fileName: f.name,
-          imageUrl: url,
-          matchedName: match ? group?.displayName ?? match.person.displayName : null,
-          matchScore: match?.score ?? null,
-          submissions: group?.submissions ?? [],
-        });
-      }
-    } catch (e) {
-      dropboxConfigured = true;
-      dropboxError = e instanceof Error ? e.message : String(e);
-    }
+    photos.push({
+      id: relPath,
+      fileName: relPath,
+      imageUrl: publicUrlForMemory(relPath),
+      matchedName: match ? group?.displayName ?? match.person.displayName : null,
+      matchScore: match?.score ?? null,
+      submissions: group?.submissions ?? [],
+    });
   }
 
   const photoMatchedKeys = new Set<string>();
@@ -107,9 +123,6 @@ export async function buildMemories(options?: {
 
   return {
     generatedAt: new Date().toISOString(),
-    sheetUrl: sheetCsvUrl,
-    dropboxConfigured,
-    dropboxError,
     photos: photos.sort((a, b) => {
       const an = a.matchedName ?? a.fileName;
       const bn = b.matchedName ?? b.fileName;
@@ -118,5 +131,3 @@ export async function buildMemories(options?: {
     storiesWithoutPhoto,
   };
 }
-
-export { DEFAULT_SHEET_CSV, DEFAULT_DROPBOX_FOLDER };

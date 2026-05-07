@@ -275,25 +275,12 @@ export function MemoryGallery() {
   return (
     <div className="memory-gallery-root">
       <p className="card-desc memory-intro">
-        Photos from the shared Dropbox album appear below. When a filename is
-        close to someone&apos;s name on the form, their message is shown
-        alongside their picture.
+        Photos and form responses are bundled with the site (under{" "}
+        <code>public/memories/</code> and <code>data/memories/</code>). When a
+        filename is close to someone&apos;s name on the form, their message is
+        shown alongside their picture. Run <code>npm run sync:memories</code>{" "}
+        to refresh from Google Drive and Dropbox.
       </p>
-
-      {!data.dropboxConfigured ? (
-        <div className="memory-banner memory-banner-warn">
-          <strong>Dropbox token not set.</strong> Add{" "}
-          <code>DROPBOX_ACCESS_TOKEN</code> in Vercel (or <code>.env.local</code>
-          ) so this page can list the shared folder. See the README for a quick
-          setup. Form responses still load from the public Google Sheet export.
-        </div>
-      ) : null}
-
-      {data.dropboxError ? (
-        <div className="memory-banner memory-banner-error" role="status">
-          <strong>Dropbox:</strong> {data.dropboxError}
-        </div>
-      ) : null}
 
       <label className="memory-search">
         <span className="memory-search-label">Search names or messages</span>
@@ -307,8 +294,12 @@ export function MemoryGallery() {
         />
       </label>
 
-      {data.photos.length === 0 && data.dropboxConfigured && !data.dropboxError ? (
-        <p className="memory-empty">No image files found in that Dropbox folder.</p>
+      {data.photos.length === 0 ? (
+        <p className="memory-empty">
+          No images in <code>public/memories/</code> yet. Add files there or run{" "}
+          <code>npm run sync:memories</code> with Dropbox configured in{" "}
+          <code>.env.local</code>.
+        </p>
       ) : null}
 
       <div className="memory-masonry">
