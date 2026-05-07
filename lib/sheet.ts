@@ -13,6 +13,29 @@ function stripBom(text: string): string {
   return text;
 }
 
+/**
+ * Google Form CSV exports often use `M/D/YYYY H:mm:ss` (US). Parse to epoch ms
+ * so sorting is reliable across environments (plain `new Date(str)` is flaky).
+ */
+function submissionTimeMs(timestamp: string): number {
+  const t = timestamp.trim();
+  if (!t) return NaN;
+  const m = t.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/,
+  );
+  if (m) {
+    const month = parseInt(m[1]!, 10) - 1;
+    const day = parseInt(m[2]!, 10);
+    const year = parseInt(m[3]!, 10);
+    const hh = m[4] ? parseInt(m[4], 10) : 0;
+    const mm = m[5] ? parseInt(m[5], 10) : 0;
+    const ss = m[6] ? parseInt(m[6], 10) : 0;
+    return new Date(year, month, day, hh, mm, ss).getTime();
+  }
+  const parsed = Date.parse(t);
+  return Number.isNaN(parsed) ? NaN : parsed;
+}
+
 function detectColumns(headers: string[]): {
   timestamp: string;
   name: string;
@@ -115,12 +138,20 @@ export function groupSubmissionsByPerson(rows: SheetSubmission[]): PersonGroup[]
       (key === "__anonymous__"
         ? "Anonymous"
         : submissions[0]!.name.trim() || "Friend");
+    submissions.sort((a, b) => {
+      const ta = submissionTimeMs(a.timestamp);
+      const tb = submissionTimeMs(b.timestamp);
+      if (Number.isNaN(ta) && Number.isNaN(tb)) {
+        return a.timestamp.localeCompare(b.timestamp);
+      }
+      if (Number.isNaN(ta)) return 1;
+      if (Number.isNaN(tb)) return -1;
+      return ta - tb; /* oldest first → newest last */
+    });
     groups.push({
       key,
       displayName,
-      submissions: submissions.sort(
-        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-      ),
+      submissions,
     });
   }
 
