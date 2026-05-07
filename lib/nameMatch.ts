@@ -29,6 +29,7 @@ export function nameHintFromFilename(filename: string): string {
     )
       continue;
     if (/^\(\d+\)$/.test(p)) continue;
+    if (/^image\d*$/i.test(p)) continue;
     kept.push(p);
   }
   while (kept.length && /^\(\d+\)$/.test(kept[kept.length - 1]!)) {
