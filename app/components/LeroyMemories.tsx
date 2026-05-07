@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import type {
   MemoriesPayload,
@@ -57,10 +58,11 @@ function Lightbox({
       >
         ×
       </button>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- variable aspect ratio */}
       <img
         src={item.url}
         alt={item.label}
+        decoding="async"
         onClick={(e) => e.stopPropagation()}
       />
     </div>
@@ -83,13 +85,13 @@ function Thumb({
       onClick={() => onOpen(file.url, `${personLabel} — ${file.fileName}`)}
       aria-label={`Open ${file.fileName}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={file.url}
         alt=""
+        fill
         className="leroy-album-thumb"
-        loading="lazy"
-        decoding="async"
+        sizes="(max-width: 480px) 28vw, (max-width: 768px) 22vw, (max-width: 1100px) 18vw, 160px"
+        quality={75}
       />
     </button>
   );
@@ -185,13 +187,13 @@ function UnmatchedCard({
         onClick={() => onOpen(file.url, `Unmatched — ${file.fileName}`)}
         aria-label={`Open ${file.fileName}`}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={file.url}
           alt=""
+          fill
           className="leroy-card-img"
-          loading="lazy"
-          decoding="async"
+          sizes="(max-width: 480px) 100vw, (max-width: 900px) 50vw, 320px"
+          quality={75}
         />
       </button>
       <div className="leroy-card-body">
@@ -470,15 +472,15 @@ export function LeroyMemories() {
   return (
     <div className="leroy-page">
       <header className="leroy-hero">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           className="leroy-hero-photo"
           src="/leroy-hero.jpeg"
           alt="LeRoy Harvey"
           width={2048}
           height={1536}
-          decoding="async"
-          fetchPriority="high"
+          priority
+          sizes="(max-width: 640px) 100vw, 520px"
+          quality={85}
         />
         <h1>LeRoy Harvey</h1>
         <p className="tag">A place for memories, photos, and words of love</p>
