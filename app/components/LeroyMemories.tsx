@@ -25,7 +25,7 @@ function Lightbox({
   item,
   onClose,
 }: {
-  item: { url: string; kind: "image" | "video"; label: string };
+  item: { url: string; label: string };
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -46,7 +46,7 @@ function Lightbox({
       className="leroy-lightbox"
       role="dialog"
       aria-modal="true"
-      aria-label="Enlarged media"
+      aria-label="Enlarged photo"
       onClick={onClose}
     >
       <button
@@ -57,22 +57,12 @@ function Lightbox({
       >
         ×
       </button>
-      {item.kind === "video" ? (
-        <video
-          src={item.url}
-          controls
-          autoPlay
-          playsInline
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.url}
-          alt={item.label}
-          onClick={(e) => e.stopPropagation()}
-        />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={item.url}
+        alt={item.label}
+        onClick={(e) => e.stopPropagation()}
+      />
     </div>
   );
 }
@@ -84,35 +74,23 @@ function Thumb({
 }: {
   file: MemoryFile;
   personLabel: string;
-  onOpen: (url: string, kind: "image" | "video", label: string) => void;
+  onOpen: (url: string, label: string) => void;
 }) {
   return (
     <button
       type="button"
       className="leroy-album-thumb-btn"
-      onClick={() =>
-        onOpen(file.url, file.kind, `${personLabel} — ${file.fileName}`)
-      }
+      onClick={() => onOpen(file.url, `${personLabel} — ${file.fileName}`)}
       aria-label={`Open ${file.fileName}`}
     >
-      {file.kind === "video" ? (
-        <video
-          src={file.url}
-          className="leroy-album-thumb"
-          muted
-          playsInline
-          preload="metadata"
-        />
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={file.url}
-          alt=""
-          className="leroy-album-thumb"
-          loading="lazy"
-          decoding="async"
-        />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={file.url}
+        alt=""
+        className="leroy-album-thumb"
+        loading="lazy"
+        decoding="async"
+      />
     </button>
   );
 }
@@ -122,14 +100,13 @@ function PersonAlbumCard({
   onOpen,
 }: {
   album: PersonAlbum;
-  onOpen: (url: string, kind: "image" | "video", label: string) => void;
+  onOpen: (url: string, label: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const hasMessage = album.submissions.some((s) => s.message.trim());
   const combined = album.submissions.map((s) => s.message).join("\n\n");
   const n = album.media.length;
-  const countLabel =
-    n === 1 ? "1 photo / clip" : `${n} photos & clips`;
+  const countLabel = n === 1 ? "1 photo" : `${n} photos`;
 
   return (
     <article className="leroy-card leroy-card--album">
@@ -140,7 +117,7 @@ function PersonAlbumCard({
       <div
         className="leroy-album-media"
         role="list"
-        aria-label={`Media from ${album.displayName}`}
+        aria-label={`Photos from ${album.displayName}`}
       >
         {album.media.map((file) => (
           <Thumb
@@ -198,36 +175,24 @@ function UnmatchedCard({
   onOpen,
 }: {
   file: MemoryFile;
-  onOpen: (url: string, kind: "image" | "video", label: string) => void;
+  onOpen: (url: string, label: string) => void;
 }) {
   return (
     <article className="leroy-card">
       <button
         type="button"
         className="leroy-card-media-btn"
-        onClick={() =>
-          onOpen(file.url, file.kind, `Unmatched — ${file.fileName}`)
-        }
+        onClick={() => onOpen(file.url, `Unmatched — ${file.fileName}`)}
         aria-label={`Open ${file.fileName}`}
       >
-        {file.kind === "video" ? (
-          <video
-            src={file.url}
-            className="leroy-card-video"
-            muted
-            playsInline
-            preload="metadata"
-          />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={file.url}
-            alt=""
-            className="leroy-card-img"
-            loading="lazy"
-            decoding="async"
-          />
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={file.url}
+          alt=""
+          className="leroy-card-img"
+          loading="lazy"
+          decoding="async"
+        />
       </button>
       <div className="leroy-card-body">
         <h2 className="leroy-card-name">Unmatched file</h2>
@@ -408,11 +373,9 @@ function QuickActions() {
               🖼️
             </span>
             <span className="leroy-action-text">
-              <span className="leroy-action-title">
-                Upload a photo or video
-              </span>
+              <span className="leroy-action-title">Upload a photo</span>
               <span className="leroy-action-desc">
-                Dropbox file request—no account needed
+                Dropbox file request—no account needed (photos only on this page)
               </span>
             </span>
             <span className="leroy-action-arrow" aria-hidden>
@@ -472,7 +435,6 @@ export function LeroyMemories() {
   const [error, setError] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{
     url: string;
-    kind: "image" | "video";
     label: string;
   } | null>(null);
 
@@ -545,7 +507,7 @@ export function LeroyMemories() {
           <section className="leroy-gallery-intro" aria-label="About this gallery">
             <h2 className="leroy-section-title">Photos &amp; messages</h2>
             <p className="leroy-section-sub">
-              Below are pictures and clips people have shared, grouped by person.
+              Below are pictures people have shared, grouped by person.
               When someone used the message form, you&apos;ll see their note;
               otherwise you may see{" "}
               <strong>Photos from…</strong> using the name on the file. For
@@ -567,9 +529,7 @@ export function LeroyMemories() {
                 <PersonAlbumCard
                   key={album.nameKey}
                   album={album}
-                  onOpen={(url, kind, label) =>
-                    setLightbox({ url, kind, label })
-                  }
+                  onOpen={(url, label) => setLightbox({ url, label })}
                 />
               ))}
             </div>
@@ -587,9 +547,7 @@ export function LeroyMemories() {
                   <UnmatchedCard
                     key={file.id}
                     file={file}
-                    onOpen={(url, kind, label) =>
-                      setLightbox({ url, kind, label })
-                    }
+                    onOpen={(url, label) => setLightbox({ url, label })}
                   />
                 ))}
               </div>

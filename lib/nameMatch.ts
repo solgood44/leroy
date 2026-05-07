@@ -36,7 +36,7 @@ export function filenameKeptNameParts(filename: string): string[] {
 
 /**
  * Dropbox / phone export filenames often look like:
- * `IMG_4413 Millicent Wibert.jpeg`, `20241226_113113_6181F8 Kurstin Shalawylo.mp4`, UUID + name, etc.
+ * `IMG_4413 Millicent Wibert.jpeg`, UUID + name, etc.
  * Pull out the trailing human name for matching.
  */
 export function nameHintFromFilename(filename: string): string {

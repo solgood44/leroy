@@ -8,12 +8,11 @@ import {
 } from "./nameMatch";
 import { groupSubmissionsByPerson, parseFormSheetCsv } from "./sheet";
 
-/** One image or video file (no form text — that lives on the person album). */
+/** One image file (no form text — that lives on the person album). */
 export type MemoryFile = {
   id: string;
   fileName: string;
   url: string;
-  kind: "image" | "video";
 };
 
 /** Grouped media: form submissions and/or name parsed from filenames. */
@@ -42,8 +41,8 @@ export type MemoriesPayload = {
   storiesWithoutMedia: MemoryStory[];
 };
 
-const MEDIA_RE = /\.(jpe?g|png|gif|webp|heic|avif|bmp|tif?f|mp4|mov|webm)$/i;
-const VIDEO_RE = /\.(mp4|mov|webm)$/i;
+/** Images only — videos are not listed in the gallery (keeps deploy small). */
+const IMAGE_RE = /\.(jpe?g|png|gif|webp|heic|avif|bmp|tif?f)$/i;
 
 const CSV_PATH = join(process.cwd(), "data", "memories", "submissions.csv");
 const MEMORIES_PUBLIC_DIR = join(process.cwd(), "public", "memories");
@@ -68,7 +67,7 @@ async function listMemoryMedia(): Promise<
       const full = join(dir, e.name);
       if (e.isDirectory()) {
         out.push(...(await walk(full, rel)));
-      } else if (e.isFile() && MEDIA_RE.test(e.name)) {
+      } else if (e.isFile() && IMAGE_RE.test(e.name)) {
         out.push({ relPath: rel, baseName: e.name });
       }
     }
@@ -113,7 +112,6 @@ export async function buildMemories(): Promise<MemoriesPayload> {
       id: relPath,
       fileName: relPath,
       url: publicUrlForMemory(relPath),
-      kind: VIDEO_RE.test(baseName) ? "video" : "image",
     };
 
     if (match && group) {
