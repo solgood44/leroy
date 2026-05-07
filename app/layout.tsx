@@ -15,14 +15,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "LeRoy Harvey — memories & music",
+  title: "LeRoy Harvey — memories",
   description:
-    "A place for LeRoy Harvey’s music, community work, photos, and links — shared by family.",
-  openGraph: {
-    title: "LeRoy Harvey — memories & music",
-    description:
-      "A place for LeRoy Harvey’s music, community work, photos, and links — shared by family.",
-  },
+    "Photos, videos, and words from family and friends for LeRoy Harvey.",
 };
 
 export default function RootLayout({
@@ -33,11 +28,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${literata.variable} ${outfit.variable} h-full antialiased`}
+      className={`${literata.variable} ${outfit.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col antialiased section-green">
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

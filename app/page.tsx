@@ -1,5 +1,5 @@
-import { LeroySite } from "./components/LeroySite";
+import { LeroyMemories } from "./components/LeroyMemories";
 
 export default function Home() {
-  return <LeroySite />;
+  return <LeroyMemories />;
 }

@@ -3,10 +3,11 @@ import { join } from "path";
 import { groupSubmissionsByPerson, parseFormSheetCsv } from "./sheet";
 import { pickBestPersonMatch, type ScoredPerson } from "./nameMatch";
 
-export type MemoryPhoto = {
+export type MemoryMedia = {
   id: string;
   fileName: string;
-  imageUrl: string;
+  url: string;
+  kind: "image" | "video";
   matchedName: string | null;
   matchScore: number | null;
   submissions: import("./sheet").SheetSubmission[];
@@ -21,16 +22,17 @@ export type MemoryStory = {
 
 export type MemoriesPayload = {
   generatedAt: string;
-  photos: MemoryPhoto[];
-  storiesWithoutPhoto: MemoryStory[];
+  items: MemoryMedia[];
+  storiesWithoutMedia: MemoryStory[];
 };
 
-const IMAGE_RE = /\.(jpe?g|png|gif|webp|heic|avif|bmp|tif?f)$/i;
+const MEDIA_RE = /\.(jpe?g|png|gif|webp|heic|avif|bmp|tif?f|mp4|mov|webm)$/i;
+const VIDEO_RE = /\.(mp4|mov|webm)$/i;
 
 const CSV_PATH = join(process.cwd(), "data", "memories", "submissions.csv");
 const MEMORIES_PUBLIC_DIR = join(process.cwd(), "public", "memories");
 
-async function listMemoryImages(): Promise<
+async function listMemoryMedia(): Promise<
   { relPath: string; baseName: string }[]
 > {
   async function walk(
@@ -50,7 +52,7 @@ async function listMemoryImages(): Promise<
       const full = join(dir, e.name);
       if (e.isDirectory()) {
         out.push(...(await walk(full, rel)));
-      } else if (e.isFile() && IMAGE_RE.test(e.name)) {
+      } else if (e.isFile() && MEDIA_RE.test(e.name)) {
         out.push({ relPath: rel, baseName: e.name });
       }
     }
@@ -63,19 +65,12 @@ function publicUrlForMemory(relPath: string): string {
   return `/memories/${relPath.split("/").map(encodeURIComponent).join("/")}`;
 }
 
-/**
- * Build gallery payload from committed files:
- * - `data/memories/submissions.csv` (form responses)
- * - `public/memories/**` (images)
- */
 export async function buildMemories(): Promise<MemoriesPayload> {
   let csvText: string;
   try {
     csvText = await readFile(CSV_PATH, "utf8");
   } catch {
-    throw new Error(
-      "Missing data/memories/submissions.csv. Run: npm run sync:memories",
-    );
+    throw new Error("Missing data/memories/submissions.csv.");
   }
 
   const rows = parseFormSheetCsv(csvText);
@@ -86,34 +81,35 @@ export async function buildMemories(): Promise<MemoriesPayload> {
     displayName: p.displayName,
   }));
 
-  const imageFiles = await listMemoryImages();
-  const photos: MemoryPhoto[] = [];
+  const files = await listMemoryMedia();
+  const items: MemoryMedia[] = [];
 
-  for (const { relPath, baseName } of imageFiles) {
+  for (const { relPath, baseName } of files) {
     const match = pickBestPersonMatch(baseName, scoredPeople, 55);
     const group = match
       ? people.find((p) => p.key === match.person.key)
       : undefined;
 
-    photos.push({
+    items.push({
       id: relPath,
       fileName: relPath,
-      imageUrl: publicUrlForMemory(relPath),
+      url: publicUrlForMemory(relPath),
+      kind: VIDEO_RE.test(baseName) ? "video" : "image",
       matchedName: match ? group?.displayName ?? match.person.displayName : null,
       matchScore: match?.score ?? null,
       submissions: group?.submissions ?? [],
     });
   }
 
-  const photoMatchedKeys = new Set<string>();
-  for (const p of photos) {
-    for (const s of p.submissions) {
-      photoMatchedKeys.add(s.nameKey);
+  const mediaMatchedKeys = new Set<string>();
+  for (const item of items) {
+    for (const s of item.submissions) {
+      mediaMatchedKeys.add(s.nameKey);
     }
   }
 
-  const storiesWithoutPhoto: MemoryStory[] = people
-    .filter((g) => !photoMatchedKeys.has(g.key))
+  const storiesWithoutMedia: MemoryStory[] = people
+    .filter((g) => !mediaMatchedKeys.has(g.key))
     .map((g) => ({
       displayName: g.displayName,
       nameKey: g.key,
@@ -123,11 +119,16 @@ export async function buildMemories(): Promise<MemoriesPayload> {
 
   return {
     generatedAt: new Date().toISOString(),
-    photos: photos.sort((a, b) => {
+    items: items.sort((a, b) => {
       const an = a.matchedName ?? a.fileName;
       const bn = b.matchedName ?? b.fileName;
-      return an.localeCompare(bn);
+      const c = an.localeCompare(bn);
+      if (c !== 0) return c;
+      return a.fileName.localeCompare(b.fileName);
     }),
-    storiesWithoutPhoto,
+    storiesWithoutMedia,
   };
 }
+
+/** @deprecated use MemoryMedia */
+export type MemoryPhoto = MemoryMedia;
