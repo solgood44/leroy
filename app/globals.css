@@ -304,6 +304,31 @@ body {
   border-top: 1px solid var(--border);
 }
 
+.leroy-thanks {
+  margin: 1rem 0 0;
+  padding: 1rem 1.15rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(107, 83, 68, 0.09) 0%,
+    rgba(107, 83, 68, 0.04) 100%
+  );
+  border: 1px solid rgba(107, 83, 68, 0.18);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--text);
+  max-width: 42rem;
+}
+
+.leroy-thanks-sign {
+  display: block;
+  margin-top: 0.65rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 /* ——— Grid ——— */
 .leroy-grid {
   display: grid;

@@ -516,6 +516,12 @@ export function LeroyMemories() {
               otherwise you may see{" "}
               <strong>Photos from…</strong> using the name on the file.
             </p>
+            <p className="leroy-thanks">
+              Thank you for all the sweet messages and photos—we&apos;ve been
+              touched by every one. We&apos;ll do our best to add more here as
+              they come in. Thanks again.
+              <span className="leroy-thanks-sign">— Molly &amp; Solomon</span>
+            </p>
           </section>
 
           {data.albums.length > 0 ? (
