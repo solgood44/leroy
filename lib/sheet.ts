@@ -72,7 +72,8 @@ function detectColumns(headers: string[]): {
 }
 
 export function parseFormSheetCsv(csvText: string): SheetSubmission[] {
-  const text = stripBom(csvText);
+  /** CRLF inside multiline quoted fields can confuse Papa on some exports; normalize. */
+  const text = stripBom(csvText).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const parsed = Papa.parse<Record<string, string>>(text, {
     header: true,
     skipEmptyLines: "greedy",

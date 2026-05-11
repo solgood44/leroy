@@ -85,7 +85,8 @@ async function main() {
   const after = merged.length;
   console.log(`Rows: existing ${before}, incoming ${incoming.length}, merged ${after} (removed ${before + incoming.length - after} duplicates).`);
 
-  await writeFile(DEFAULT_EXISTING, toCsv(merged) + "\n", "utf8");
+  /** LF-only: CRLF breaks Papa on some multiline quoted fields */
+  await writeFile(DEFAULT_EXISTING, toCsv(merged).replace(/\r\n/g, "\n") + "\n", "utf8");
   console.log(`Wrote ${DEFAULT_EXISTING}`);
 }
 
