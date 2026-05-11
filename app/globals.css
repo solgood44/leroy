@@ -293,6 +293,10 @@ body {
   overflow-y: auto;
 }
 
+.leroy-update-body[hidden] {
+  display: none !important;
+}
+
 .leroy-update-letter {
   font-size: 0.98rem;
   line-height: 1.65;
@@ -498,6 +502,13 @@ body {
   line-height: 0;
   aspect-ratio: 4 / 3;
   box-shadow: var(--shadow);
+}
+
+/* Next/Image fill needs a non-static positioned parent; isolate from UA/Tailwind button rules */
+.leroy-timeline-photo-frame {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
 }
 
 .leroy-timeline-photo-img {

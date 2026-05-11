@@ -112,8 +112,9 @@ function PersonAlbumCard({
   album: PersonAlbum;
   onOpen: (url: string, label: string) => void;
 }) {
-  const nPhotos = album.timeline.filter((e) => e.kind === "photo").length;
-  const nNotes = album.timeline.filter((e) => e.kind === "note").length;
+  const timeline = album.timeline ?? [];
+  const nPhotos = timeline.filter((e) => e.kind === "photo").length;
+  const nNotes = timeline.filter((e) => e.kind === "note").length;
   const summary = [
     nPhotos ? `${nPhotos} photo${nPhotos === 1 ? "" : "s"}` : null,
     nNotes ? `${nNotes} note${nNotes === 1 ? "" : "s"}` : null,
@@ -134,7 +135,7 @@ function PersonAlbumCard({
         className="leroy-timeline"
         aria-label={`Timeline for ${album.displayName}`}
       >
-        {album.timeline.map((entry: AlbumTimelineEntry, i: number) => (
+        {timeline.map((entry: AlbumTimelineEntry, i: number) => (
           <li
             key={
               entry.kind === "photo"
@@ -165,14 +166,16 @@ function PersonAlbumCard({
                 }
                 aria-label={`Open photo from ${entry.when}`}
               >
-                <Image
-                  src={entry.file.url}
-                  alt=""
-                  fill
-                  className="leroy-timeline-photo-img"
-                  sizes="(max-width: 640px) 100vw, min(100vw, 36rem)"
-                  quality={75}
-                />
+                <div className="leroy-timeline-photo-frame">
+                  <Image
+                    src={entry.file.url}
+                    alt=""
+                    fill
+                    className="leroy-timeline-photo-img"
+                    sizes="(max-width: 640px) 100vw, 576px"
+                    quality={75}
+                  />
+                </div>
               </button>
             ) : (
               <TimelineNoteBody entry={entry} />

@@ -104,7 +104,7 @@ async function listMemoryMedia(): Promise<
         out.push(...(await walk(full, rel)));
       } else if (e.isFile() && IMAGE_RE.test(e.name)) {
         const st = await stat(full);
-        out.push({ relPath: rel, baseName: e.name, mtimeMs: st.mtimeMs });
+        out.push({ relPath: rel, baseName: e.name, mtimeMs: Math.round(st.mtimeMs) });
       }
     }
     return out;
