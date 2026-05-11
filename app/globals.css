@@ -449,28 +449,107 @@ body {
   color: var(--muted);
 }
 
-.leroy-album-media {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 0.45rem;
-  padding: 0 1.1rem 1rem;
+.leroy-album-order-hint {
+  font-weight: 400;
+  opacity: 0.92;
 }
 
-.leroy-album-thumb-btn {
+/* ——— Per-person timeline (photos + form notes by date) ——— */
+.leroy-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.leroy-timeline-item {
+  padding-bottom: 1.35rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.leroy-timeline-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.leroy-timeline-when {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.55rem;
+  letter-spacing: 0.02em;
+}
+
+.leroy-timeline-photo-btn {
   position: relative;
+  width: 100%;
+  max-width: 36rem;
+  margin: 0 auto;
   display: block;
   padding: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   cursor: zoom-in;
-  background: #111;
+  background: #1a1816;
   line-height: 0;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
+  box-shadow: var(--shadow);
 }
 
-.leroy-album-thumb {
+.leroy-timeline-photo-img {
   object-fit: cover;
+}
+
+.leroy-timeline-note {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 1rem 1.15rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 0 rgba(28, 26, 23, 0.04);
+}
+
+.leroy-timeline-note-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin: 0 0 0.55rem;
+}
+
+.leroy-timeline-note-text p {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.leroy-timeline-more {
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0 0;
+  margin: 0;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.leroy-timeline-note-by {
+  margin: 0.7rem 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
 }
 
 .leroy-unmatched {

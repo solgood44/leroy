@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import type {
+  AlbumTimelineEntry,
+  AlbumTimelineNote,
   MemoriesPayload,
   MemoryFile,
   MemoryStory,
@@ -69,31 +71,37 @@ function Lightbox({
   );
 }
 
-function Thumb({
-  file,
-  personLabel,
-  onOpen,
-}: {
-  file: MemoryFile;
-  personLabel: string;
-  onOpen: (url: string, label: string) => void;
-}) {
+function TimelineNoteBody({ entry }: { entry: AlbumTimelineNote }) {
+  const [expanded, setExpanded] = useState(false);
+  const msg = entry.submission.message.trim();
+  const previewLen = 240;
+  const hasMore = msg.length > previewLen;
+  const preview = excerpt(msg, previewLen);
+
   return (
-    <button
-      type="button"
-      className="leroy-album-thumb-btn"
-      onClick={() => onOpen(file.url, `${personLabel} — ${file.fileName}`)}
-      aria-label={`Open ${file.fileName}`}
-    >
-      <Image
-        src={file.url}
-        alt=""
-        fill
-        className="leroy-album-thumb"
-        sizes="(max-width: 480px) 28vw, (max-width: 768px) 22vw, (max-width: 1100px) 18vw, 160px"
-        quality={75}
-      />
-    </button>
+    <div className="leroy-timeline-note">
+      <p className="leroy-timeline-note-label">Form message</p>
+      <div className="leroy-timeline-note-text">
+        {expanded || !hasMore ? (
+          <p>{msg}</p>
+        ) : (
+          <p>{preview}</p>
+        )}
+      </div>
+      {hasMore ? (
+        <button
+          type="button"
+          className="leroy-timeline-more"
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+        >
+          {expanded ? "Show less" : "Read full message"}
+        </button>
+      ) : null}
+      {entry.submission.name.trim() ? (
+        <p className="leroy-timeline-note-by">— {entry.submission.name.trim()}</p>
+      ) : null}
+    </div>
   );
 }
 
@@ -104,70 +112,74 @@ function PersonAlbumCard({
   album: PersonAlbum;
   onOpen: (url: string, label: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const hasMessage = album.submissions.some((s) => s.message.trim());
-  const combined = album.submissions.map((s) => s.message).join("\n\n");
-  const n = album.media.length;
-  const countLabel = n === 1 ? "1 photo" : `${n} photos`;
+  const nPhotos = album.timeline.filter((e) => e.kind === "photo").length;
+  const nNotes = album.timeline.filter((e) => e.kind === "note").length;
+  const summary = [
+    nPhotos ? `${nPhotos} photo${nPhotos === 1 ? "" : "s"}` : null,
+    nNotes ? `${nNotes} note${nNotes === 1 ? "" : "s"}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <article className="leroy-card leroy-card--album">
       <div className="leroy-card-body leroy-card-body--album-top">
         <h2 className="leroy-card-name">{album.displayName}</h2>
-        <p className="leroy-album-count">{countLabel}</p>
+        <p className="leroy-album-count">
+          {summary}
+          <span className="leroy-album-order-hint"> · Newest at top</span>
+        </p>
       </div>
-      <div
-        className="leroy-album-media"
-        role="list"
-        aria-label={`Photos from ${album.displayName}`}
+      <ol
+        className="leroy-timeline"
+        aria-label={`Timeline for ${album.displayName}`}
       >
-        {album.media.map((file) => (
-          <Thumb
-            key={file.id}
-            file={file}
-            personLabel={album.displayName}
-            onOpen={onOpen}
-          />
-        ))}
-      </div>
-      {!album.fromFilenameOnly ? (
-        <div className="leroy-card-body">
-          {hasMessage ? (
-            <>
+        {album.timeline.map((entry: AlbumTimelineEntry, i: number) => (
+          <li
+            key={
+              entry.kind === "photo"
+                ? entry.file.id
+                : `note-${entry.submission.timestamp}-${i}`
+            }
+            className="leroy-timeline-item"
+          >
+            <time
+              className="leroy-timeline-when"
+              dateTime={
+                entry.sortKeyMs > 0
+                  ? new Date(entry.sortKeyMs).toISOString()
+                  : undefined
+              }
+            >
+              {entry.when}
+            </time>
+            {entry.kind === "photo" ? (
               <button
                 type="button"
-                className="leroy-toggle"
-                onClick={() => setOpen((v) => !v)}
-                aria-expanded={open}
+                className="leroy-timeline-photo-btn"
+                onClick={() =>
+                  onOpen(
+                    entry.file.url,
+                    `${album.displayName} — ${entry.file.fileName}`,
+                  )
+                }
+                aria-label={`Open photo from ${entry.when}`}
               >
-                {open ? "Hide notes from the form" : "Read notes from the form"}
+                <Image
+                  src={entry.file.url}
+                  alt=""
+                  fill
+                  className="leroy-timeline-photo-img"
+                  sizes="(max-width: 640px) 100vw, min(100vw, 36rem)"
+                  quality={75}
+                />
               </button>
-              {open ? (
-                <div className="leroy-messages">
-                  {album.submissions.map((s, i) => (
-                    <blockquote
-                      key={`${s.timestamp}-${i}`}
-                      className="leroy-quote"
-                    >
-                      {s.message.trim() ? <p>{s.message}</p> : null}
-                      <footer>
-                        {s.name.trim() ? `${s.name} · ` : null}
-                        {s.timestamp}
-                      </footer>
-                    </blockquote>
-                  ))}
-                </div>
-              ) : (
-                <p className="leroy-preview">{excerpt(combined)}</p>
-              )}
-            </>
-          ) : (
-            <p className="leroy-hint">
-              No message text on the form for this person.
-            </p>
-          )}
-        </div>
-      ) : null}
+            ) : (
+              <TimelineNoteBody entry={entry} />
+            )}
+          </li>
+        ))}
+      </ol>
     </article>
   );
 }
@@ -509,13 +521,11 @@ export function LeroyMemories() {
           <section className="leroy-gallery-intro" aria-label="About this gallery">
             <h2 className="leroy-section-title">Photos &amp; messages</h2>
             <p className="leroy-section-sub">
-              Below are pictures people have shared, grouped by person.
-              When someone used the message form, you&apos;ll see their note;
-              otherwise you may see{" "}
-              <strong>Photos from…</strong> using the name on the file. For
-              news from the family, check{" "}
-              <strong>Updates from Sol &amp; Mol</strong> above—we&apos;ll add
-              more there when we can.
+              Each section is one person. Inside, photos and form messages are
+              mixed in <strong>date order</strong> (newest at the top) so you can
+              follow what came in when. Names without a form row appear as{" "}
+              <strong>Photos from…</strong> from the filename. Family news lives
+              in <strong>Updates from Sol &amp; Mol</strong> above.
             </p>
             <p className="leroy-thanks">
               Thank you for all the sweet messages and photos—we&apos;ve been
