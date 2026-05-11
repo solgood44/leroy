@@ -143,11 +143,11 @@ export function groupSubmissionsByPerson(rows: SheetSubmission[]): PersonGroup[]
       const ta = submissionTimeMs(a.timestamp);
       const tb = submissionTimeMs(b.timestamp);
       if (Number.isNaN(ta) && Number.isNaN(tb)) {
-        return a.timestamp.localeCompare(b.timestamp);
+        return b.timestamp.localeCompare(a.timestamp);
       }
       if (Number.isNaN(ta)) return 1;
       if (Number.isNaN(tb)) return -1;
-      return ta - tb; /* oldest first → newest last */
+      return tb - ta; /* newest first */
     });
     groups.push({
       key,
