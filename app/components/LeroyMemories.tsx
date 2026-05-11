@@ -1,20 +1,27 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type {
-  AlbumTimelineEntry,
-  AlbumTimelineNote,
+  ChronologicalFormMessage,
   MemoriesPayload,
   MemoryFile,
-  MemoryStory,
   PersonAlbum,
 } from "@/lib/memories";
-
-function excerpt(text: string, max = 200): string {
-  const t = text.trim();
-  if (t.length <= max) return t;
-  return `${t.slice(0, max).trim()}…`;
+/** Split form paste into readable paragraphs; tame odd line breaks from the sheet. */
+function formMessageToParagraphs(raw: string): string[] {
+  const normalized = raw.trim().replace(/\n{3,}/g, "\n\n");
+  return normalized
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s*\n\s*/g, " ").replace(/[ \t]+/g, " ").trim())
+    .filter(Boolean);
 }
 
 const LINKS = {
@@ -71,119 +78,142 @@ function Lightbox({
   );
 }
 
-function TimelineNoteBody({ entry }: { entry: AlbumTimelineNote }) {
-  const [expanded, setExpanded] = useState(false);
-  const msg = entry.submission.message.trim();
-  const previewLen = 240;
-  const hasMore = msg.length > previewLen;
-  const preview = excerpt(msg, previewLen);
-
-  return (
-    <div className="leroy-timeline-note">
-      <p className="leroy-timeline-note-label">Form message</p>
-      <div className="leroy-timeline-note-text">
-        {expanded || !hasMore ? (
-          <p>{msg}</p>
-        ) : (
-          <p>{preview}</p>
-        )}
-      </div>
-      {hasMore ? (
-        <button
-          type="button"
-          className="leroy-timeline-more"
-          onClick={() => setExpanded((e) => !e)}
-          aria-expanded={expanded}
-        >
-          {expanded ? "Show less" : "Read full message"}
-        </button>
-      ) : null}
-      {entry.submission.name.trim() ? (
-        <p className="leroy-timeline-note-by">— {entry.submission.name.trim()}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function PersonAlbumCard({
-  album,
+function PhotoCarousel({
+  media,
+  whenByFileId,
+  albumLabel,
   onOpen,
 }: {
-  album: PersonAlbum;
+  media: MemoryFile[];
+  whenByFileId: Map<string, string>;
+  albumLabel: string;
   onOpen: (url: string, label: string) => void;
 }) {
-  const timeline = album.timeline ?? [];
-  const nPhotos = timeline.filter((e) => e.kind === "photo").length;
-  const nNotes = timeline.filter((e) => e.kind === "note").length;
-  const summary = [
-    nPhotos ? `${nPhotos} photo${nPhotos === 1 ? "" : "s"}` : null,
-    nNotes ? `${nNotes} note${nNotes === 1 ? "" : "s"}` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+  const n = media.length;
+
+  const syncIndex = useCallback(() => {
+    const el = trackRef.current;
+    if (!el || n <= 0) return;
+    const w = el.clientWidth;
+    if (w <= 0) return;
+    const i = Math.round(el.scrollLeft / w);
+    setIndex(Math.max(0, Math.min(n - 1, i)));
+  }, [n]);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", syncIndex, { passive: true });
+    return () => el.removeEventListener("scroll", syncIndex);
+  }, [syncIndex]);
+
+  useEffect(() => {
+    window.addEventListener("resize", syncIndex);
+    return () => window.removeEventListener("resize", syncIndex);
+  }, [syncIndex]);
+
+  const scrollTo = useCallback(
+    (i: number) => {
+      const el = trackRef.current;
+      if (!el || n <= 0) return;
+      const w = el.clientWidth;
+      const clamped = Math.max(0, Math.min(n - 1, i));
+      el.scrollTo({ left: clamped * w, behavior: "smooth" });
+    },
+    [n],
+  );
+
+  if (n === 0) return null;
 
   return (
-    <article className="leroy-card leroy-card--album">
-      <div className="leroy-card-body leroy-card-body--album-top">
-        <h2 className="leroy-card-name">{album.displayName}</h2>
-        <p className="leroy-album-count">
-          {summary}
-          <span className="leroy-album-order-hint"> · Newest at top</span>
-        </p>
-      </div>
-      <ol
-        className="leroy-timeline"
-        aria-label={`Timeline for ${album.displayName}`}
-      >
-        {timeline.map((entry: AlbumTimelineEntry, i: number) => (
-          <li
-            key={
-              entry.kind === "photo"
-                ? entry.file.id
-                : `note-${entry.submission.timestamp}-${i}`
-            }
-            className="leroy-timeline-item"
-          >
-            <time
-              className="leroy-timeline-when"
-              dateTime={
-                entry.sortKeyMs > 0
-                  ? new Date(entry.sortKeyMs).toISOString()
-                  : undefined
-              }
+    <div
+      className="leroy-photo-carousel"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={`Photos from ${albumLabel}`}
+    >
+      <div className="leroy-photo-carousel-viewport">
+        {n > 1 ? (
+          <>
+            <button
+              type="button"
+              className="leroy-carousel-nav leroy-carousel-nav--prev"
+              onClick={() => scrollTo(index - 1)}
+              disabled={index <= 0}
+              aria-label="Previous photo"
             >
-              {entry.when}
-            </time>
-            {entry.kind === "photo" ? (
+              ‹
+            </button>
+            <button
+              type="button"
+              className="leroy-carousel-nav leroy-carousel-nav--next"
+              onClick={() => scrollTo(index + 1)}
+              disabled={index >= n - 1}
+              aria-label="Next photo"
+            >
+              ›
+            </button>
+          </>
+        ) : null}
+        <div ref={trackRef} className="leroy-photo-carousel-track">
+          {media.map((file) => {
+            const when = whenByFileId.get(file.id) ?? "";
+            return (
+              <div key={file.id} className="leroy-photo-carousel-slide">
+                {when ? (
+                  <p className="leroy-carousel-when">{when}</p>
+                ) : null}
+                <button
+                  type="button"
+                  className="leroy-carousel-photo-btn"
+                  onClick={() =>
+                    onOpen(file.url, `${albumLabel} — ${file.fileName}`)
+                  }
+                  aria-label={when ? `Open photo from ${when}` : "Open photo"}
+                >
+                  <div className="leroy-carousel-photo-frame">
+                    <Image
+                      src={file.url}
+                      alt=""
+                      fill
+                      className="leroy-carousel-photo-img"
+                      sizes="(max-width: 640px) 100vw, 720px"
+                      quality={75}
+                    />
+                  </div>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {n > 1 ? (
+        <div className="leroy-carousel-meta">
+          <p className="leroy-carousel-counter" aria-live="polite">
+            {index + 1} / {n}
+          </p>
+          <div className="leroy-carousel-dots" role="tablist" aria-label="Photo">
+            {media.map((file, i) => (
               <button
+                key={file.id}
                 type="button"
-                className="leroy-timeline-photo-btn"
-                onClick={() =>
-                  onOpen(
-                    entry.file.url,
-                    `${album.displayName} — ${entry.file.fileName}`,
-                  )
+                role="tab"
+                aria-selected={i === index}
+                aria-label={`Photo ${i + 1} of ${n}`}
+                className={
+                  i === index
+                    ? "leroy-carousel-dot leroy-carousel-dot--active"
+                    : "leroy-carousel-dot"
                 }
-                aria-label={`Open photo from ${entry.when}`}
-              >
-                <div className="leroy-timeline-photo-frame">
-                  <Image
-                    src={entry.file.url}
-                    alt=""
-                    fill
-                    className="leroy-timeline-photo-img"
-                    sizes="(max-width: 640px) 100vw, 576px"
-                    quality={75}
-                  />
-                </div>
-              </button>
-            ) : (
-              <TimelineNoteBody entry={entry} />
-            )}
-          </li>
-        ))}
-      </ol>
-    </article>
+                onClick={() => scrollTo(i)}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -223,34 +253,334 @@ function UnmatchedCard({
   );
 }
 
-function LetterCard({ story }: { story: MemoryStory }) {
-  const [open, setOpen] = useState(false);
-  const combined = story.submissions.map((s) => s.message).join("\n\n");
+function formFeedShowAttribution(m: ChronologicalFormMessage): boolean {
+  if (!m.signedName.trim()) return false;
+  return (
+    m.signedName.trim().toLowerCase() !== m.displayName.trim().toLowerCase()
+  );
+}
+
+function FormMessageParagraphs({ text }: { text: string }) {
+  const paras = formMessageToParagraphs(text);
+  if (paras.length === 0) {
+    return <p className="leroy-form-feed-para">{text.trim()}</p>;
+  }
+  return paras.map((para, pi) => (
+    <p key={pi} className="leroy-form-feed-para">
+      {para}
+    </p>
+  ));
+}
+
+function albumPhotoWhenMap(album: PersonAlbum): Map<string, string> {
+  const whenByFileId = new Map<string, string>();
+  for (const e of album.timeline ?? []) {
+    if (e.kind === "photo") whenByFileId.set(e.file.id, e.when);
+  }
+  return whenByFileId;
+}
+
+function albumPhotoLatestMs(album: PersonAlbum): number {
+  let x = 0;
+  for (const e of album.timeline ?? []) {
+    if (e.kind === "photo" && e.sortKeyMs > x) x = e.sortKeyMs;
+  }
+  return x;
+}
+
+function formatFeedWhen(sortKeyMs: number): string {
+  if (sortKeyMs <= 0) return "Date unknown";
+  return new Date(sortKeyMs).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function FormFeedItem({
+  m,
+  album,
+  onOpenLightbox,
+}: {
+  m: ChronologicalFormMessage;
+  album: PersonAlbum | undefined;
+  onOpenLightbox: (url: string, label: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [pendingScroll, setPendingScroll] = useState<
+    "message" | "photos" | null
+  >(null);
+  const messageRef = useRef<HTMLDivElement>(null);
+  const photosRef = useRef<HTMLDivElement>(null);
+  const dateTime =
+    m.sortKeyMs > 0 ? new Date(m.sortKeyMs).toISOString() : undefined;
+  const hasPics = Boolean(album && album.media.length > 0);
+
+  const openCard = useCallback(
+    (target: "message" | "photos" | "all") => {
+      setExpanded(true);
+      if (target === "all") setPendingScroll("message");
+      else if (target === "photos" && hasPics) setPendingScroll("photos");
+      else setPendingScroll("message");
+    },
+    [hasPics],
+  );
+
+  useLayoutEffect(() => {
+    if (!expanded || pendingScroll === null) return;
+    const el =
+      pendingScroll === "photos"
+        ? photosRef.current
+        : messageRef.current;
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setPendingScroll(null);
+  }, [expanded, pendingScroll]);
+
+  const whenByFileId = album ? albumPhotoWhenMap(album) : new Map();
 
   return (
-    <article className="leroy-letter-card">
-      <h3>{story.displayName}</h3>
-      <button
-        type="button"
-        className="leroy-toggle"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-      >
-        {open ? "Hide note" : "Read note"}
-      </button>
-      {open ? (
-        <div className="leroy-messages">
-          {story.submissions.map((s, i) => (
-            <blockquote key={`${s.timestamp}-${i}`} className="leroy-quote">
-              {s.message.trim() ? <p>{s.message}</p> : null}
-              <footer>{s.timestamp}</footer>
-            </blockquote>
-          ))}
+    <li className="leroy-form-feed-item">
+      {!expanded ? (
+        <div className="leroy-form-feed-collapsed">
+          <div className="leroy-form-feed-collapsed-left">
+            <time className="leroy-form-feed-when" dateTime={dateTime}>
+              {m.when}
+            </time>
+            <span className="leroy-form-feed-name leroy-form-feed-name--row">
+              {m.displayName}
+            </span>
+            <div className="leroy-form-feed-pills">
+              <button
+                type="button"
+                className="leroy-form-feed-pill"
+                onClick={() => openCard("message")}
+              >
+                Read post
+              </button>
+              {hasPics ? (
+                <button
+                  type="button"
+                  className="leroy-form-feed-pill"
+                  onClick={() => openCard("photos")}
+                >
+                  See pics
+                </button>
+              ) : null}
+            </div>
+          </div>
+          <button
+            type="button"
+            className="leroy-form-feed-open-all"
+            onClick={() => openCard("all")}
+            aria-label={`Open everything: ${m.displayName}`}
+          >
+            +
+          </button>
         </div>
       ) : (
-        <p className="leroy-preview">{excerpt(combined)}</p>
+        <div className="leroy-form-feed-expanded">
+          <div className="leroy-form-feed-expanded-top">
+            <div className="leroy-form-feed-expanded-meta">
+              <time className="leroy-form-feed-when" dateTime={dateTime}>
+                {m.when}
+              </time>
+              <h3 className="leroy-form-feed-name">{m.displayName}</h3>
+            </div>
+            <button
+              type="button"
+              className="leroy-form-feed-collapse-btn"
+              onClick={() => setExpanded(false)}
+              aria-expanded="true"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+
+          <div ref={messageRef} className="leroy-form-feed-message-block">
+            <p className="leroy-form-feed-block-label">Message</p>
+            <div className="leroy-form-feed-body">
+              <FormMessageParagraphs text={m.message} />
+            </div>
+            {formFeedShowAttribution(m) ? (
+              <p className="leroy-form-feed-signed">— {m.signedName}</p>
+            ) : null}
+          </div>
+
+          {hasPics && album ? (
+            <div ref={photosRef} className="leroy-form-feed-photos-block">
+              <p className="leroy-form-feed-block-label">Their photos</p>
+              <PhotoCarousel
+                media={album.media}
+                whenByFileId={whenByFileId}
+                albumLabel={album.displayName}
+                onOpen={onOpenLightbox}
+              />
+            </div>
+          ) : null}
+        </div>
       )}
-    </article>
+    </li>
+  );
+}
+
+type LeroyFeedEntry =
+  | {
+      kind: "message";
+      key: string;
+      sortKeyMs: number;
+      m: ChronologicalFormMessage;
+    }
+  | {
+      kind: "photosOnly";
+      key: string;
+      sortKeyMs: number;
+      album: PersonAlbum;
+      whenLabel: string;
+    };
+
+function FormFeedPhotoOnlyItem({
+  album,
+  whenLabel,
+  onOpenLightbox,
+}: {
+  album: PersonAlbum;
+  whenLabel: string;
+  onOpenLightbox: (url: string, label: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [pendingScroll, setPendingScroll] = useState(false);
+  const photosRef = useRef<HTMLDivElement>(null);
+  const sortKeyMs = albumPhotoLatestMs(album);
+  const dateTimeAttr =
+    sortKeyMs > 0 ? new Date(sortKeyMs).toISOString() : undefined;
+  const whenByFileId = albumPhotoWhenMap(album);
+
+  const openToPhotos = useCallback(() => {
+    setExpanded(true);
+    setPendingScroll(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!expanded || !pendingScroll) return;
+    photosRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setPendingScroll(false);
+  }, [expanded, pendingScroll]);
+
+  return (
+    <li className="leroy-form-feed-item leroy-form-feed-item--photos-only">
+      {!expanded ? (
+        <div className="leroy-form-feed-collapsed">
+          <div className="leroy-form-feed-collapsed-left">
+            <time className="leroy-form-feed-when" dateTime={dateTimeAttr}>
+              {whenLabel}
+            </time>
+            <span className="leroy-form-feed-name leroy-form-feed-name--row">
+              {album.displayName}
+            </span>
+            <p className="leroy-form-feed-filename-hint">
+              Photos only — we couldn&apos;t match a form row; name comes from
+              the filename.
+            </p>
+            <div className="leroy-form-feed-pills">
+              <button
+                type="button"
+                className="leroy-form-feed-pill"
+                onClick={openToPhotos}
+              >
+                See pics
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="leroy-form-feed-open-all"
+            onClick={openToPhotos}
+            aria-label={`Open photos: ${album.displayName}`}
+          >
+            +
+          </button>
+        </div>
+      ) : (
+        <div className="leroy-form-feed-expanded">
+          <div className="leroy-form-feed-expanded-top">
+            <div className="leroy-form-feed-expanded-meta">
+              <time className="leroy-form-feed-when" dateTime={dateTimeAttr}>
+                {whenLabel}
+              </time>
+              <h3 className="leroy-form-feed-name">{album.displayName}</h3>
+            </div>
+            <button
+              type="button"
+              className="leroy-form-feed-collapse-btn"
+              onClick={() => setExpanded(false)}
+              aria-expanded="true"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+          <p className="leroy-form-feed-photos-only-note">
+            No form message here—only Dropbox photos where we read the name from
+            the file.
+          </p>
+          <div ref={photosRef} className="leroy-form-feed-photos-block">
+            <p className="leroy-form-feed-block-label">Photos</p>
+            <PhotoCarousel
+              media={album.media}
+              whenByFileId={whenByFileId}
+              albumLabel={album.displayName}
+              onOpen={onOpenLightbox}
+            />
+          </div>
+        </div>
+      )}
+    </li>
+  );
+}
+
+function FormMessagesFeed({
+  entries,
+  albumsByPersonKey,
+  onOpenLightbox,
+}: {
+  entries: LeroyFeedEntry[];
+  albumsByPersonKey: Map<string, PersonAlbum>;
+  onOpenLightbox: (url: string, label: string) => void;
+}) {
+  if (entries.length === 0) return null;
+  return (
+    <section className="leroy-form-feed" aria-label="Posts from friends and family">
+      <h2 className="leroy-form-feed-title">Posts</h2>
+      <p className="leroy-form-feed-sub">
+        Newest first. Each row is <strong>who</strong> and <strong>when</strong>.
+        <strong> Read post</strong> / <strong> See pics</strong> open the same
+        card (note and matched photos together when we have both). If someone
+        only uploaded photos with a name in the filename, they appear here too—
+        open <strong> See pics</strong> for their gallery.
+      </p>
+      <ol className="leroy-form-feed-list">
+        {entries.map((e) =>
+          e.kind === "message" ? (
+            <FormFeedItem
+              key={e.key}
+              m={e.m}
+              album={albumsByPersonKey.get(e.m.personKey)}
+              onOpenLightbox={onOpenLightbox}
+            />
+          ) : (
+            <FormFeedPhotoOnlyItem
+              key={e.key}
+              album={e.album}
+              whenLabel={e.whenLabel}
+              onOpenLightbox={onOpenLightbox}
+            />
+          ),
+        )}
+      </ol>
+    </section>
   );
 }
 
@@ -459,7 +789,7 @@ export function LeroyMemories() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/memories");
+        const res = await fetch("/api/memories", { cache: "no-store" });
         const json: unknown = await res.json();
         if (!res.ok) {
           const msg =
@@ -483,6 +813,44 @@ export function LeroyMemories() {
   }, []);
 
   const closeLb = useCallback(() => setLightbox(null), []);
+
+  const albumsByPersonKey = useMemo(() => {
+    const m = new Map<string, PersonAlbum>();
+    for (const a of data?.albums ?? []) {
+      if (a.fromFilenameOnly) continue;
+      m.set(a.nameKey, a);
+    }
+    return m;
+  }, [data?.albums]);
+
+  const mergedFeed = useMemo((): LeroyFeedEntry[] => {
+    if (!data) return [];
+    const rows: LeroyFeedEntry[] = [];
+    for (const m of data.formMessagesChronological) {
+      rows.push({
+        kind: "message",
+        sortKeyMs: m.sortKeyMs,
+        key: `m-${m.personKey}-${m.sourceOrder}`,
+        m,
+      });
+    }
+    for (const album of data.albums) {
+      if (!album.fromFilenameOnly) continue;
+      const sortKeyMs = albumPhotoLatestMs(album);
+      rows.push({
+        kind: "photosOnly",
+        sortKeyMs,
+        key: `p-${album.nameKey}`,
+        album,
+        whenLabel: formatFeedWhen(sortKeyMs),
+      });
+    }
+    rows.sort((a, b) => {
+      if (b.sortKeyMs !== a.sortKeyMs) return b.sortKeyMs - a.sortKeyMs;
+      return a.key.localeCompare(b.key);
+    });
+    return rows;
+  }, [data]);
 
   return (
     <div className="leroy-page">
@@ -524,11 +892,10 @@ export function LeroyMemories() {
           <section className="leroy-gallery-intro" aria-label="About this gallery">
             <h2 className="leroy-section-title">Photos &amp; messages</h2>
             <p className="leroy-section-sub">
-              Each section is one person. Inside, photos and form messages are
-              mixed in <strong>date order</strong> (newest at the top) so you can
-              follow what came in when. Names without a form row appear as{" "}
-              <strong>Photos from…</strong> from the filename. Family news lives
-              in <strong>Updates from Sol &amp; Mol</strong> above.
+              Everything lives in <strong>Posts</strong> below: form messages and
+              matched photos together when we can link them. We also try to fold
+              filename-only uploads into the same person as the form. Family
+              news is in <strong>Updates from Sol &amp; Mol</strong> above.
             </p>
             <p className="leroy-thanks">
               Thank you for all the sweet messages and photos—we&apos;ve been
@@ -538,16 +905,12 @@ export function LeroyMemories() {
             </p>
           </section>
 
-          {data.albums.length > 0 ? (
-            <div className="leroy-grid">
-              {data.albums.map((album) => (
-                <PersonAlbumCard
-                  key={album.nameKey}
-                  album={album}
-                  onOpen={(url, label) => setLightbox({ url, label })}
-                />
-              ))}
-            </div>
+          {mergedFeed.length > 0 ? (
+            <FormMessagesFeed
+              entries={mergedFeed}
+              albumsByPersonKey={albumsByPersonKey}
+              onOpenLightbox={(url, label) => setLightbox({ url, label })}
+            />
           ) : null}
 
           {data.unmatchedMedia.length > 0 ? (
@@ -564,20 +927,6 @@ export function LeroyMemories() {
                     file={file}
                     onOpen={(url, label) => setLightbox({ url, label })}
                   />
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {data.storiesWithoutMedia.length > 0 ? (
-            <section className="leroy-letters" aria-label="Notes without media">
-              <h2>Notes without a matched photo</h2>
-              <p className="sub">
-                We didn&apos;t find files for these names—only what they wrote.
-              </p>
-              <div className="leroy-letters-grid">
-                {data.storiesWithoutMedia.map((s) => (
-                  <LetterCard key={s.nameKey} story={s} />
                 ))}
               </div>
             </section>

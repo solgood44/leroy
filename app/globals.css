@@ -458,7 +458,142 @@ body {
   opacity: 0.92;
 }
 
-/* ——— Per-person timeline (photos + form notes by date) ——— */
+/* ——— Per-person photo carousel ——— */
+.leroy-photo-carousel {
+  margin: 0 1.1rem 1.1rem;
+}
+
+.leroy-photo-carousel-viewport {
+  position: relative;
+}
+
+.leroy-photo-carousel-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leroy-photo-carousel-track {
+    scroll-behavior: auto;
+  }
+}
+
+.leroy-photo-carousel-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.leroy-carousel-when {
+  margin: 0 0 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.leroy-carousel-photo-btn {
+  position: relative;
+  width: 100%;
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: #1a1816;
+  line-height: 0;
+  aspect-ratio: 4 / 3;
+  box-shadow: var(--shadow);
+}
+
+.leroy-carousel-photo-frame {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.leroy-carousel-photo-img {
+  object-fit: cover;
+}
+
+.leroy-carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 252, 248, 0.94);
+  color: #1c1a17;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(28, 26, 23, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 0.12rem;
+}
+
+.leroy-carousel-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.leroy-carousel-nav--prev {
+  left: 0.45rem;
+}
+
+.leroy-carousel-nav--next {
+  right: 0.45rem;
+}
+
+.leroy-carousel-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+  padding: 0 0.15rem;
+}
+
+.leroy-carousel-counter {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.leroy-carousel-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.leroy-carousel-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--border);
+  cursor: pointer;
+}
+
+.leroy-carousel-dot--active {
+  background: var(--accent);
+}
+
+/* ——— Per-person timeline (form messages by date) ——— */
 .leroy-timeline {
   list-style: none;
   margin: 0;
@@ -581,6 +716,258 @@ body {
   color: var(--muted);
   font-size: 0.95rem;
   max-width: 40rem;
+}
+
+.leroy-jump-target {
+  scroll-margin-top: 1.25rem;
+}
+
+.leroy-form-feed {
+  margin: 0 0 2.25rem;
+  padding: 1.5rem 1.5rem 1.55rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-width: 40rem;
+}
+
+.leroy-form-feed-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.45rem;
+  letter-spacing: -0.01em;
+}
+
+.leroy-form-feed-sub {
+  margin: 0 0 1.35rem;
+  font-size: 0.98rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.leroy-form-feed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.leroy-form-feed-item {
+  margin: 0;
+  padding: 0;
+  background: rgba(255, 252, 248, 0.65);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 1px 0 rgba(28, 26, 23, 0.03);
+  overflow: hidden;
+}
+
+.leroy-form-feed-collapsed {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.95rem 1.1rem;
+  background: transparent;
+}
+
+.leroy-form-feed-collapsed-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.leroy-form-feed-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
+.leroy-form-feed-pill {
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(107, 83, 68, 0.38);
+  background: rgba(255, 252, 248, 0.98);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.leroy-form-feed-pill:hover {
+  background: var(--accent-soft);
+}
+
+.leroy-form-feed-pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.leroy-form-feed-open-all {
+  flex-shrink: 0;
+  width: 1.85rem;
+  height: 1.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  font-size: 1.35rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--accent);
+  border: 1px solid rgba(107, 83, 68, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 252, 248, 0.9);
+  cursor: pointer;
+}
+
+.leroy-form-feed-open-all:hover {
+  background: rgba(107, 83, 68, 0.08);
+}
+
+.leroy-form-feed-open-all:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.leroy-form-feed-expanded {
+  padding: 1rem 1.15rem 1.2rem;
+}
+
+.leroy-form-feed-expanded-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(229, 223, 214, 0.9);
+}
+
+.leroy-form-feed-expanded-meta {
+  min-width: 0;
+}
+
+.leroy-form-feed-collapse-btn {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 300;
+  color: var(--muted);
+  background: rgba(28, 26, 23, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.leroy-form-feed-collapse-btn:hover {
+  color: var(--text);
+  background: rgba(28, 26, 23, 0.08);
+}
+
+.leroy-form-feed-when {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.leroy-form-feed-name {
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  font-weight: 600;
+  margin: 0.35rem 0 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.leroy-form-feed-name--row {
+  display: block;
+  margin: 0.15rem 0 0;
+  font-size: 1.18rem;
+}
+
+.leroy-form-feed-expanded .leroy-form-feed-name {
+  margin-top: 0.25rem;
+}
+
+.leroy-form-feed-message-block {
+  margin-bottom: 1.1rem;
+}
+
+.leroy-form-feed-photos-block {
+  margin-top: 0.15rem;
+}
+
+.leroy-form-feed-block-label {
+  margin: 0 0 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.leroy-form-feed-expanded .leroy-photo-carousel {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.leroy-form-feed-filename-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--muted);
+  max-width: 28rem;
+}
+
+.leroy-form-feed-photos-only-note {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 36rem;
+}
+
+.leroy-form-feed-body {
+  max-width: 38rem;
+}
+
+.leroy-form-feed-para {
+  margin: 0 0 0.85em;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  line-height: 1.68;
+  color: var(--text);
+  text-wrap: pretty;
+}
+
+.leroy-form-feed-para:last-child {
+  margin-bottom: 0;
+}
+
+.leroy-form-feed-signed {
+  margin: 0.85rem 0 0;
+  padding-top: 0.55rem;
+  border-top: 1px dashed rgba(229, 223, 214, 0.9);
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--muted);
 }
 
 .leroy-card-name {

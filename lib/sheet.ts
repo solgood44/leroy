@@ -6,6 +6,8 @@ export type SheetSubmission = {
   name: string;
   nameKey: string;
   message: string;
+  /** Row index in the CSV (later rows = newer exports); tie-breaks equal timestamps */
+  sourceOrder: number;
 };
 
 function stripBom(text: string): string {
@@ -94,6 +96,7 @@ export function parseFormSheetCsv(csvText: string): SheetSubmission[] {
 
   const cols = detectColumns(headers);
   const rows: SheetSubmission[] = [];
+  let sourceOrder = 0;
 
   for (const row of parsed.data) {
     const timestamp = (row[cols.timestamp] ?? "").trim();
@@ -105,6 +108,7 @@ export function parseFormSheetCsv(csvText: string): SheetSubmission[] {
       name,
       nameKey: normalizeNameKey(name),
       message,
+      sourceOrder: sourceOrder++,
     });
   }
 
@@ -143,11 +147,12 @@ export function groupSubmissionsByPerson(rows: SheetSubmission[]): PersonGroup[]
       const ta = submissionTimeMs(a.timestamp);
       const tb = submissionTimeMs(b.timestamp);
       if (Number.isNaN(ta) && Number.isNaN(tb)) {
-        return b.timestamp.localeCompare(a.timestamp);
+        return b.sourceOrder - a.sourceOrder;
       }
       if (Number.isNaN(ta)) return 1;
       if (Number.isNaN(tb)) return -1;
-      return tb - ta; /* newest first */
+      if (tb !== ta) return tb - ta;
+      return b.sourceOrder - a.sourceOrder;
     });
     groups.push({
       key,

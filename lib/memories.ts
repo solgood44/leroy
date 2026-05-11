@@ -44,17 +44,24 @@ export type PersonAlbum = {
   displayName: string;
   submissions: import("./sheet").SheetSubmission[];
   media: MemoryFile[];
-  /** Photos and form notes interleaved, newest first */
+  /** Photos and form notes interleaved by sort key (used for dates + album recency) */
   timeline: AlbumTimelineEntry[];
   /** True when there was no Google Form row—label comes from Dropbox filename only */
   fromFilenameOnly?: boolean;
 };
 
-export type MemoryStory = {
+/** Every form submission with text, one place, sorted newest-first by send time. */
+export type ChronologicalFormMessage = {
+  sortKeyMs: number;
+  when: string;
+  personKey: string;
   displayName: string;
-  nameKey: string;
-  submissions: import("./sheet").SheetSubmission[];
-  hasPhoto: boolean;
+  signedName: string;
+  message: string;
+  sourceOrder: number;
+  hasMatchedPhotos: boolean;
+  /** Newest matched gallery image for this person (pairs blurb with their photos). */
+  matchedPhotoUrl: string | null;
 };
 
 export type MemoriesPayload = {
@@ -62,7 +69,7 @@ export type MemoriesPayload = {
   albums: PersonAlbum[];
   /** No form match and we couldn’t read a name from the filename */
   unmatchedMedia: MemoryFile[];
-  storiesWithoutMedia: MemoryStory[];
+  formMessagesChronological: ChronologicalFormMessage[];
 };
 
 /** Images only — videos are not listed in the gallery (keeps deploy small). */
@@ -135,6 +142,38 @@ function formatTimelineWhen(ms: number): string {
   });
 }
 
+function buildFormMessagesChronological(
+  people: import("./sheet").PersonGroup[],
+  keysWithMatchedPhotos: Set<string>,
+  matchedPhotoUrlByPerson: Map<string, string>,
+): ChronologicalFormMessage[] {
+  const rows: ChronologicalFormMessage[] = [];
+  for (const p of people) {
+    for (const s of p.submissions) {
+      if (!s.message.trim()) continue;
+      const t = submissionTimeMs(s.timestamp);
+      rows.push({
+        sortKeyMs: Number.isNaN(t) ? 0 : t,
+        when: Number.isNaN(t)
+          ? s.timestamp.trim() || "Date unknown"
+          : formatTimelineWhen(t),
+        personKey: p.key,
+        displayName: p.displayName,
+        signedName: s.name.trim(),
+        message: s.message.trim(),
+        sourceOrder: s.sourceOrder,
+        hasMatchedPhotos: keysWithMatchedPhotos.has(p.key),
+        matchedPhotoUrl: matchedPhotoUrlByPerson.get(p.key) ?? null,
+      });
+    }
+  }
+  rows.sort((a, b) => {
+    if (b.sortKeyMs !== a.sortKeyMs) return b.sortKeyMs - a.sortKeyMs;
+    return b.sourceOrder - a.sourceOrder;
+  });
+  return rows;
+}
+
 function buildTimeline(
   tagged: MediaWithMtime[],
   submissions: import("./sheet").SheetSubmission[],
@@ -160,6 +199,9 @@ function buildTimeline(
   }
   entries.sort((a, b) => {
     if (b.sortKeyMs !== a.sortKeyMs) return b.sortKeyMs - a.sortKeyMs;
+    if (a.kind === "note" && b.kind === "note") {
+      return b.submission.sourceOrder - a.submission.sourceOrder;
+    }
     if (a.kind !== b.kind) return a.kind === "photo" ? 1 : -1;
     return 0;
   });
@@ -222,6 +264,38 @@ export async function buildMemories(): Promise<MemoriesPayload> {
     }
   }
 
+  /** Attach filename-only buckets to the closest form person (exact name or fuzzy). */
+  function mergeFilenameBucketsIntoFormPeople(): void {
+    for (const fk of [...byFilenameName.keys()]) {
+      const tagged = byFilenameName.get(fk);
+      if (!tagged?.length) continue;
+      const sampleBase =
+        tagged[0]!.file.fileName.replace(/^.*\//, "") ||
+        tagged[0]!.file.fileName;
+      const pretty = displayNameFromFilename(sampleBase);
+      if (pretty) {
+        const nk = normalizeNameKey(pretty);
+        const direct = people.find((p) => p.key === nk);
+        if (direct) {
+          if (!byPerson.has(direct.key)) byPerson.set(direct.key, []);
+          byPerson.get(direct.key)!.push(...tagged);
+          byFilenameName.delete(fk);
+          continue;
+        }
+      }
+      let match = pickBestPersonMatch(sampleBase, scoredPeople, 45);
+      if (!match) match = pickBestPersonMatch(sampleBase, scoredPeople, 38);
+      if (match) {
+        const { key } = match.person;
+        if (!byPerson.has(key)) byPerson.set(key, []);
+        byPerson.get(key)!.push(...tagged);
+        byFilenameName.delete(fk);
+      }
+    }
+  }
+
+  mergeFilenameBucketsIntoFormPeople();
+
   type AlbumDraft = { album: PersonAlbum; recencyMs: number };
   const albumDrafts: AlbumDraft[] = [];
 
@@ -276,25 +350,25 @@ export async function buildMemories(): Promise<MemoriesPayload> {
     people.filter((p) => byPerson.get(p.key)?.length).map((p) => p.key),
   );
 
-  const storiesWithoutMedia: MemoryStory[] = people
-    .filter((g) => !keysWithFormMedia.has(g.key))
-    .map((g) => ({
-      displayName: g.displayName,
-      nameKey: g.key,
-      submissions: g.submissions,
-      hasPhoto: false,
-    }))
-    .sort(
-      (a, b) =>
-        maxTimestampMs(b.submissions) - maxTimestampMs(a.submissions) ||
-        a.displayName.localeCompare(b.displayName),
-    );
+  const matchedPhotoUrlByPerson = new Map<string, string>();
+  for (const p of people) {
+    const tagged = byPerson.get(p.key);
+    if (!tagged?.length) continue;
+    const cover = sortMediaNewestFirst([...tagged])[0]!;
+    matchedPhotoUrlByPerson.set(p.key, cover.url);
+  }
+
+  const formMessagesChronological = buildFormMessagesChronological(
+    people,
+    keysWithFormMedia,
+    matchedPhotoUrlByPerson,
+  );
 
   return {
     generatedAt: new Date().toISOString(),
     albums,
     unmatchedMedia,
-    storiesWithoutMedia,
+    formMessagesChronological,
   };
 }
 
