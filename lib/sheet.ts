@@ -17,7 +17,7 @@ function stripBom(text: string): string {
  * Google Form CSV exports often use `M/D/YYYY H:mm:ss` (US). Parse to epoch ms
  * so sorting is reliable across environments (plain `new Date(str)` is flaky).
  */
-function submissionTimeMs(timestamp: string): number {
+export function submissionTimeMs(timestamp: string): number {
   const t = timestamp.trim();
   if (!t) return NaN;
   const m = t.match(
