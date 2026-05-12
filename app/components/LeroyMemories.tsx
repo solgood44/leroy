@@ -584,40 +584,72 @@ function FormMessagesFeed({
 }
 
 function FamilyUpdatePanel() {
-  const [expanded, setExpanded] = useState(false);
+  const [earlierOpen, setEarlierOpen] = useState(false);
 
   return (
     <section
       className="leroy-update"
-      aria-label="Family update from Molly and Solomon"
+      aria-label="Family updates from Molly and Solomon"
     >
-      <button
-        type="button"
-        className="leroy-update-trigger"
-        onClick={() => setExpanded((e) => !e)}
-        aria-expanded={expanded}
-        aria-controls="update-body"
-      >
-        <span className="leroy-update-trigger-main">
-          <span className="leroy-update-badge">Family update</span>
-          <span className="leroy-update-trigger-title">
-            Updates from Sol &amp; Mol
-          </span>
-        </span>
-        <span className="leroy-update-chevron" aria-hidden>
-          {expanded ? "−" : "+"}
-        </span>
-      </button>
-      {!expanded ? (
-        <p className="leroy-update-teaser">
-          Tap above for a note from Molly &amp; Solomon about Dad—hospice at
-          home, how he&apos;s doing, and how to stay in touch. Keep an eye on
-          this section; we&apos;ll add more to the letter here when we can.
-        </p>
-      ) : null}
-      <div id="update-body" className="leroy-update-body" hidden={!expanded}>
+      <div className="leroy-update-header">
+        <span className="leroy-update-badge">Family update</span>
+        <h2 className="leroy-update-heading">Updates from Sol &amp; Mol</h2>
+      </div>
+
+      <article className="leroy-update-entry leroy-update-entry--current">
+        <header className="leroy-update-entry-head">
+          <h3 className="leroy-update-entry-title">Update 5/12</h3>
+          <time className="leroy-update-entry-date" dateTime="2026-05-12">
+            May 12, 2026
+          </time>
+        </header>
         <div className="leroy-update-letter">
-          <p className="leroy-update-salutation">Dear friends and family,</p>
+          <p>
+            We wanted to share a brief update for friends and family who are
+            asking. LeRoy is still cozy at home in East Lansing, and is being
+            cared for by a hospice team along with his son and daughter. The
+            hospice team has been amazing, and we are grateful for their
+            support.
+          </p>
+          <p>
+            LeRoy has been very peaceful and still has a great sense of humor.
+            He is open to visitors, but we ask that you check in beforehand to
+            ensure the timing will work.
+          </p>
+          <p>
+            Thank you to everyone who has reached out with support, food,
+            prayers, and more.
+          </p>
+          <p className="leroy-update-signoff">
+            With love,
+            <br />
+            Molly and Solomon &lt;3
+          </p>
+        </div>
+      </article>
+
+      <div className="leroy-update-archive">
+        <button
+          type="button"
+          className="leroy-update-archive-trigger"
+          onClick={() => setEarlierOpen((v) => !v)}
+          aria-expanded={earlierOpen}
+          aria-controls="family-update-earlier"
+        >
+          <span className="leroy-update-archive-label">
+            Earlier update · May 5, 2026
+          </span>
+          <span className="leroy-update-chevron" aria-hidden>
+            {earlierOpen ? "−" : "+"}
+          </span>
+        </button>
+        <div
+          id="family-update-earlier"
+          className="leroy-update-body"
+          hidden={!earlierOpen}
+        >
+          <div className="leroy-update-letter">
+            <p className="leroy-update-salutation">Dear friends and family,</p>
           <p>
             We wanted to share an update about our dad, LeRoy Harvey. He was
             admitted to the hospital last week after some confusion, and recent
@@ -674,6 +706,7 @@ function FamilyUpdatePanel() {
             Molly and Solomon &lt;3
           </p>
         </div>
+      </div>
       </div>
     </section>
   );
@@ -883,6 +916,10 @@ export function LeroyMemories() {
         <p className="leroy-loading">Loading photos and messages…</p>
       ) : null}
 
+      <QuickActions />
+
+      <FamilyUpdatePanel />
+
       {data && mergedFeed.length > 0 ? (
         <FormMessagesFeed
           entries={mergedFeed}
@@ -891,18 +928,14 @@ export function LeroyMemories() {
         />
       ) : null}
 
-      <QuickActions />
-
-      <FamilyUpdatePanel />
-
       {data ? (
         <>
           <section className="leroy-gallery-intro" aria-label="About this gallery">
             <h2 className="leroy-section-title">Photos &amp; messages</h2>
             <p className="leroy-section-sub">
-              <strong>Posts</strong> at the top of the page are newest first.
-              Open a row for the full note and any matched photos. Family news is
-              in <strong>Updates from Sol &amp; Mol</strong> below.
+              <strong>Posts</strong> are newest first—open a row for the full
+              note and any matched photos. Family news and ways to reach out are
+              above.
             </p>
             <p className="leroy-thanks">
               Thank you for all the sweet messages and photos—we&apos;ve been

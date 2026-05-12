@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     "Family updates, photos, and messages for LeRoy Harvey. Leave a note, share a photo, or read words from friends and family.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
