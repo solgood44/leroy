@@ -555,11 +555,10 @@ function FormMessagesFeed({
     <section className="leroy-form-feed" aria-label="Posts from friends and family">
       <h2 className="leroy-form-feed-title">Posts</h2>
       <p className="leroy-form-feed-sub">
-        Newest first. Each row is <strong>who</strong> and <strong>when</strong>.
-        <strong> Read post</strong> / <strong> See pics</strong> open the same
-        card (note and matched photos together when we have both). If someone
-        only uploaded photos with a name in the filename, they appear here too—
-        open <strong> See pics</strong> for their gallery.
+        <strong>Newest at the top.</strong> Each row is <strong>who</strong> and{" "}
+        <strong>when</strong>. Use <strong>Read post</strong> or{" "}
+        <strong>See pics</strong> to open that person&apos;s note and photos in
+        one card.
       </p>
       <ol className="leroy-form-feed-list">
         {entries.map((e) =>
@@ -847,6 +846,7 @@ export function LeroyMemories() {
     }
     rows.sort((a, b) => {
       if (b.sortKeyMs !== a.sortKeyMs) return b.sortKeyMs - a.sortKeyMs;
+      if (a.kind !== b.kind) return a.kind === "message" ? -1 : 1;
       return a.key.localeCompare(b.key);
     });
     return rows;
@@ -873,10 +873,6 @@ export function LeroyMemories() {
         </p>
       </header>
 
-      <QuickActions />
-
-      <FamilyUpdatePanel />
-
       {error ? (
         <p className="leroy-banner leroy-banner--error" role="alert">
           {error}
@@ -887,15 +883,26 @@ export function LeroyMemories() {
         <p className="leroy-loading">Loading photos and messages…</p>
       ) : null}
 
+      {data && mergedFeed.length > 0 ? (
+        <FormMessagesFeed
+          entries={mergedFeed}
+          albumsByPersonKey={albumsByPersonKey}
+          onOpenLightbox={(url, label) => setLightbox({ url, label })}
+        />
+      ) : null}
+
+      <QuickActions />
+
+      <FamilyUpdatePanel />
+
       {data ? (
         <>
           <section className="leroy-gallery-intro" aria-label="About this gallery">
             <h2 className="leroy-section-title">Photos &amp; messages</h2>
             <p className="leroy-section-sub">
-              Everything lives in <strong>Posts</strong> below: form messages and
-              matched photos together when we can link them. We also try to fold
-              filename-only uploads into the same person as the form. Family
-              news is in <strong>Updates from Sol &amp; Mol</strong> above.
+              <strong>Posts</strong> at the top of the page are newest first.
+              Open a row for the full note and any matched photos. Family news is
+              in <strong>Updates from Sol &amp; Mol</strong> below.
             </p>
             <p className="leroy-thanks">
               Thank you for all the sweet messages and photos—we&apos;ve been
@@ -904,14 +911,6 @@ export function LeroyMemories() {
               <span className="leroy-thanks-sign">— Molly &amp; Solomon</span>
             </p>
           </section>
-
-          {mergedFeed.length > 0 ? (
-            <FormMessagesFeed
-              entries={mergedFeed}
-              albumsByPersonKey={albumsByPersonKey}
-              onOpenLightbox={(url, label) => setLightbox({ url, label })}
-            />
-          ) : null}
 
           {data.unmatchedMedia.length > 0 ? (
             <section className="leroy-unmatched" aria-label="Unmatched files">
