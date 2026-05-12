@@ -445,6 +445,10 @@ body {
   font-size: 0.95rem;
 }
 
+.leroy-thanks--feed {
+  margin: 0 0 1.15rem;
+}
+
 /* ——— Grid ——— */
 .leroy-grid {
   display: grid;

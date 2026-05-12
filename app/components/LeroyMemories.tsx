@@ -560,6 +560,12 @@ function FormMessagesFeed({
         <strong>See pics</strong> to open that person&apos;s note and photos in
         one card.
       </p>
+      <p className="leroy-thanks leroy-thanks--feed">
+        Thank you for all the sweet messages and photos—we&apos;ve been
+        touched by every one. We&apos;ll do our best to add more here as they
+        come in. Thanks again.
+        <span className="leroy-thanks-sign">— Molly &amp; Solomon</span>
+      </p>
       <ol className="leroy-form-feed-list">
         {entries.map((e) =>
           e.kind === "message" ? (
@@ -936,12 +942,6 @@ export function LeroyMemories() {
               <strong>Posts</strong> are newest first—open a row for the full
               note and any matched photos. Family news and ways to reach out are
               above.
-            </p>
-            <p className="leroy-thanks">
-              Thank you for all the sweet messages and photos—we&apos;ve been
-              touched by every one. We&apos;ll do our best to add more here as
-              they come in. Thanks again.
-              <span className="leroy-thanks-sign">— Molly &amp; Solomon</span>
             </p>
           </section>
 
