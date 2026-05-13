@@ -39,7 +39,13 @@ npm run dev
 
 ## Deploy (Vercel)
 
-Import the repo and deploy. No environment variables are required if CSV and media are committed.
+Import the repo and deploy. No environment variables are required if CSV, `data/memories/payload.json`, and media are committed.
+
+**If a deploy fails on function size again:** In the Vercel project, add **`VERCEL_ANALYZE_BUILD_OUTPUT=1`**, redeploy, and read the build log for per-function size and the largest traced files. For Next.js you can also try **`VERCEL_BUILDER_DEBUG=1`** for extra size detail. That confirms whether the problem is still “static assets traced into a serverless route” vs a heavy `node_modules` dependency.
+
+**Why optimizing JPEGs didn’t fix the function limit:** `public/memories/` is served from the **CDN** as static files. The failure was from **file tracing** pulling those same binaries into the **`/api/memories` serverless bundle** because the route used `fs` on that folder. **`npm run build:memories-data`** + `data/memories/payload.json` keeps the API bundle small; **`npm run optimize:memories`** still matters for **page weight**, **git size**, and **bandwidth**, not for the old “function includes every photo” bug.
+
+**Staying lightweight when adding photos:** Keep using **`optimize:memories`** before commit; do not put **video** under `public/memories/` (gitignored); after adding or renaming files, ensure **`build:memories-data`** runs (it runs automatically before `dev` / `build`). Prefer **JPEG/WebP** at modest dimensions; avoid shipping **full‑resolution RAW exports**. If the gallery JSON ever grows huge, consider splitting payload by route or pagination later.
 
 ## Scripts
 
