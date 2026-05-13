@@ -83,11 +83,14 @@ function PhotoCarousel({
   whenByFileId,
   albumLabel,
   onOpen,
+  firstSlidePriority = false,
 }: {
   media: MemoryFile[];
   whenByFileId: Map<string, string>;
   albumLabel: string;
   onOpen: (url: string, label: string) => void;
+  /** LCP: set on the hero carousel only */
+  firstSlidePriority?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -158,7 +161,7 @@ function PhotoCarousel({
           </>
         ) : null}
         <div ref={trackRef} className="leroy-photo-carousel-track">
-          {media.map((file) => {
+          {media.map((file, slideIndex) => {
             const when = whenByFileId.get(file.id) ?? "";
             return (
               <div key={file.id} className="leroy-photo-carousel-slide">
@@ -179,8 +182,9 @@ function PhotoCarousel({
                       alt=""
                       fill
                       className="leroy-carousel-photo-img"
-                      sizes="(max-width: 640px) 100vw, 720px"
+                      sizes="(max-width: 640px) 100vw, 520px"
                       quality={75}
+                      priority={firstSlidePriority && slideIndex === 0}
                     />
                   </div>
                 </button>
@@ -815,7 +819,12 @@ function QuickActions() {
   );
 }
 
-export function LeroyMemories() {
+export function LeroyMemories({
+  heroCarouselUrls,
+}: {
+  /** First slide is typically /leroy-hero.jpeg; rest e.g. /hero-carousel/dad-000.jpeg */
+  heroCarouselUrls: string[];
+}) {
   const [data, setData] = useState<MemoriesPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{
@@ -891,19 +900,27 @@ export function LeroyMemories() {
     return rows;
   }, [data]);
 
+  const heroMedia = useMemo((): MemoryFile[] => {
+    const urls = heroCarouselUrls.length > 0 ? heroCarouselUrls : ["/leroy-hero.jpeg"];
+    return urls.map((url, i) => ({
+      id: `hero-${i}`,
+      fileName: url.split("/").pop() ?? "photo",
+      url,
+    }));
+  }, [heroCarouselUrls]);
+
   return (
     <div className="leroy-page">
       <header className="leroy-hero">
-        <Image
-          className="leroy-hero-photo"
-          src="/leroy-hero.jpeg"
-          alt="LeRoy Harvey"
-          width={2048}
-          height={1536}
-          priority
-          sizes="(max-width: 640px) 100vw, 520px"
-          quality={85}
-        />
+        <div className="leroy-hero-carousel-wrap">
+          <PhotoCarousel
+            media={heroMedia}
+            whenByFileId={new Map()}
+            albumLabel="LeRoy"
+            onOpen={(url, label) => setLightbox({ url, label })}
+            firstSlidePriority
+          />
+        </div>
         <h1>LeRoy Harvey</h1>
         <p className="tag">A place for memories, photos, and words of love</p>
         <p className="leroy-hero-email">

@@ -48,6 +48,15 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+.leroy-hero-carousel-wrap {
+  max-width: 520px;
+  margin: 0 auto 1.5rem;
+}
+
+.leroy-hero-carousel-wrap .leroy-photo-carousel {
+  margin: 0;
+}
+
 .leroy-hero-photo {
   display: block;
   width: 100%;

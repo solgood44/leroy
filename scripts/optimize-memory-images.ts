@@ -1,5 +1,7 @@
 /**
- * Resize + recompress images under public/memories/ to save repo & Vercel space.
+ * Resize + recompress images under public/memories/, public/hero-carousel/,
+ * and public/leroy-hero.jpeg to save repo & Vercel space.
+ * Also writes public/og.jpg (1200×630) from leroy-hero.jpeg for link previews.
  * Videos (.mp4, .mov, .webm) are left unchanged. GIFs are skipped.
  *
  * Defaults: long edge max 2048px, MozJPEG Q82. PNG with alpha stays PNG (compressed).
@@ -12,7 +14,8 @@ import { mkdir, readdir, readFile, rename, stat, unlink, writeFile } from "fs/pr
 import { join, extname, basename, dirname } from "path";
 import sharp from "sharp";
 
-const ROOT = join(process.cwd(), "public", "memories");
+const MEMORIES_ROOT = join(process.cwd(), "public", "memories");
+const HERO_CAROUSEL_ROOT = join(process.cwd(), "public", "hero-carousel");
 const MAX_LONG_EDGE = 2048;
 const JPEG_QUALITY = 82;
 
@@ -142,8 +145,38 @@ async function optimizeOne(absPath: string, agg: Agg): Promise<void> {
   agg.bytesAfter += outBuf.length;
 }
 
+async function writeOpenGraphThumbnail(): Promise<void> {
+  const heroPath = join(process.cwd(), "public", "leroy-hero.jpeg");
+  const outPath = join(process.cwd(), "public", "og.jpg");
+  try {
+    await stat(heroPath);
+  } catch {
+    console.warn("Skip og.jpg — public/leroy-hero.jpeg missing");
+    return;
+  }
+  const input = await readFile(heroPath);
+  const pipeline = sharp(input).rotate().resize(1200, 630, {
+    fit: "cover",
+    position: "attention",
+  });
+  const buf = await pipeline
+    .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
+    .toBuffer();
+  if (dryRun) {
+    console.log(
+      `Dry run — og.jpg would be ${(buf.length / 1024).toFixed(0)} KB (from leroy-hero.jpeg)`,
+    );
+    return;
+  }
+  await writeFile(outPath, buf);
+  console.log(`Wrote ${outPath} (${(buf.length / 1024).toFixed(0)} KB)`);
+}
+
 async function main() {
-  const files = await walk(ROOT);
+  const files = [
+    ...(await walk(MEMORIES_ROOT)),
+    ...(await walk(HERO_CAROUSEL_ROOT)),
+  ];
   const hero = join(process.cwd(), "public", "leroy-hero.jpeg");
   try {
     await stat(hero);
@@ -152,10 +185,7 @@ async function main() {
     /* optional */
   }
 
-  if (files.length === 0) {
-    console.log(`No images under ${ROOT}`);
-    return;
-  }
+  const unique = [...new Set(files)];
 
   const agg: Agg = {
     files: 0,
@@ -165,29 +195,35 @@ async function main() {
     errors: 0,
   };
 
-  console.log(
-    dryRun
-      ? `Dry run — ${files.length} images (no writes)`
-      : `Optimizing ${files.length} images…`,
-  );
+  if (unique.length > 0) {
+    console.log(
+      dryRun
+        ? `Dry run — ${unique.length} images (no writes)`
+        : `Optimizing ${unique.length} images…`,
+    );
 
-  for (const f of files.sort()) {
-    try {
-      await optimizeOne(f, agg);
-    } catch (e) {
-      agg.errors += 1;
-      console.error(`  error: ${f}`, e);
+    for (const f of unique.sort()) {
+      try {
+        await optimizeOne(f, agg);
+      } catch (e) {
+        agg.errors += 1;
+        console.error(`  error: ${f}`, e);
+      }
     }
+
+    const saved = agg.bytesBefore - agg.bytesAfter;
+    const savedMb = saved / (1024 * 1024);
+    console.log(
+      `\nDone. processed ${agg.files} images, skipped ${agg.skipped}, errors ${agg.errors}.`,
+    );
+    console.log(
+      `Size: ${(agg.bytesBefore / (1024 * 1024)).toFixed(2)} MB → ${(agg.bytesAfter / (1024 * 1024)).toFixed(2)} MB (${savedMb >= 0 ? "saved" : "grew"} ${Math.abs(savedMb).toFixed(2)} MB).`,
+    );
+  } else {
+    console.log("No images under public/memories or public/hero-carousel");
   }
 
-  const saved = agg.bytesBefore - agg.bytesAfter;
-  const savedMb = saved / (1024 * 1024);
-  console.log(
-    `\nDone. processed ${agg.files} images, skipped ${agg.skipped}, errors ${agg.errors}.`,
-  );
-  console.log(
-    `Size: ${(agg.bytesBefore / (1024 * 1024)).toFixed(2)} MB → ${(agg.bytesAfter / (1024 * 1024)).toFixed(2)} MB (${savedMb >= 0 ? "saved" : "grew"} ${Math.abs(savedMb).toFixed(2)} MB).`,
-  );
+  await writeOpenGraphThumbnail();
 }
 
 main().catch((e) => {

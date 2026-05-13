@@ -1,10 +1,13 @@
-# Pull latest form responses from the public Google Sheet CSV export every 6 hours
-# and commit data/memories/submissions.csv when it changes (triggers Vercel deploy).
+# Every 6 hours: fetch the public Google Sheet CSV, optionally pull Dropbox photos into
+# public/memories/ and optimize them, then commit changes (triggers Vercel deploy).
 #
 # Sheet: https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/
 # The tab must be viewable by "Anyone with the link" (or published) so the export URL works.
 #
-# Optional: repository variable GOOGLE_SHEET_CSV_URL overrides the default export URL.
+# Optional repository variables: GOOGLE_SHEET_CSV_URL, DROPBOX_SHARED_FOLDER_URL
+# Optional repository secret: DROPBOX_ACCESS_TOKEN (Dropbox short-lived access token with
+# files.content.read). When set, workflow downloads from the shared folder and runs
+# npm run optimize:memories (resize / recompress) before committing.
 
 name: Sync form submissions from Google Sheet
 
@@ -18,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: sync-sheet-csv
+  group: sync-memories-data
   cancel-in-progress: false
 
 jobs:
@@ -37,19 +40,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Fetch CSV from Google Sheet
+      - name: Sync sheet CSV and optional Dropbox photos
         run: npm run sync:memories
         env:
           GOOGLE_SHEET_CSV_URL: ${{ vars.GOOGLE_SHEET_CSV_URL || 'https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/export?format=csv&gid=253822378' }}
+          DROPBOX_ACCESS_TOKEN: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
+          DROPBOX_SHARED_FOLDER_URL: ${{ vars.DROPBOX_SHARED_FOLDER_URL }}
+
+      - name: Optimize memory images (after Dropbox pull)
+        if: ${{ secrets.DROPBOX_ACCESS_TOKEN != '' }}
+        run: npm run optimize:memories
 
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/memories/submissions.csv
+          git add data/memories/submissions.csv public/memories/
           if git diff --staged --quiet; then
-            echo "No changes to submissions.csv — sheet export matches repo."
+            echo "No changes to sheet or public/memories/ — nothing to commit."
             exit 0
           fi
-          git commit -m "chore: sync form submissions from Google Sheet"
+          git commit -m "chore: sync memories (sheet + photos)"
           git push

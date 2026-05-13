@@ -26,7 +26,7 @@ const DEFAULT_SHEET_CSV =
   "https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/export?format=csv&gid=253822378";
 
 const DEFAULT_DROPBOX_FOLDER =
-  "https://www.dropbox.com/scl/fo/1rgt2ngvykre8yj0y5xzk/ALOX2PTKGs3zxPETDEuo_ns?rlkey=63no67lx3rt4pra4pwg75jfum&dl=0";
+  "https://www.dropbox.com/scl/fo/1rgt2ngvykre8yj0y5xzk/ALOX2PTKGs3zxPETDEuo_ns?rlkey=fuy1peo1mu698zvkl8zy1yius&dl=0";
 
 const dataDir = join(root, "data", "memories");
 const outDir = join(root, "public", "memories");

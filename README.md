@@ -6,19 +6,29 @@ A simple Next.js site: **photos and videos** from `public/memories/` are **group
 
 ### Automatic (every 6 hours)
 
-GitHub Actions runs **Sync form submissions from Google Sheet** on a schedule and commits `data/memories/submissions.csv` when the [public CSV export](https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/export?format=csv&gid=253822378) changes (which triggers your usual deploy, e.g. Vercel). The sheet tab must be **viewable by anyone with the link** (or published) so the export URL works without the Sheets API.
+GitHub Actions runs **Sync form submissions from Google Sheet** on a schedule. It always fetches the [public CSV export](https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/export?format=csv&gid=253822378) into `data/memories/submissions.csv`. If you add a **repository secret** `DROPBOX_ACCESS_TOKEN` (Dropbox app token with `files.content.read`), the same job also downloads images from the shared album into `public/memories/`, runs **`npm run optimize:memories`** (resize long edge to 2048px, MozJPEG quality 82; PNG with alpha kept as PNG), and commits both paths when anything changes. The sheet tab must be **viewable by anyone with the link** (or published) so the export URL works without the Sheets API.
 
 - **Manual run:** GitHub → Actions → that workflow → **Run workflow**.
-- **Override URL:** repo **Settings → Secrets and variables → Actions → Variables** → `GOOGLE_SHEET_CSV_URL` (optional).
+- **Override URLs:** Actions **Variables** → `GOOGLE_SHEET_CSV_URL` and/or `DROPBOX_SHARED_FOLDER_URL` (optional; the repo default folder URL matches the current shared album link).
+- **Dropbox token:** Actions **Secrets** → `DROPBOX_ACCESS_TOKEN`. Omit it to keep CI sheet-only (no photo sync in CI). Dropbox short-lived tokens expire; refresh the secret when downloads start failing with 401.
 
-If new form rows appear in the Sheet but **not on the site**, check **GitHub → Actions → Sync form submissions** for failed runs. The job must be allowed to **push to `main`** (repo **Settings → Actions → General → Workflow permissions: Read and write**). A green run with “No changes” means the export matched the repo file already.
+If new form rows or Dropbox photos are missing on the site, check **GitHub → Actions → Sync form submissions** for failed runs. The job must be allowed to **push to `main`** (repo **Settings → Actions → General → Workflow permissions: Read and write**). A green run with “No changes” means the sheet export and `public/memories/` already matched what CI pulled.
 
 ### Manual
 
 1. Replace **`data/memories/submissions.csv`** with a fresh export from the Google Sheet (same columns: timestamp, name, message), or run **`npm run sync:memories`** locally (uses `GOOGLE_SHEET_CSV_URL` from `.env.local` or the default Sheet URL in `scripts/sync-memories.ts`).
 2. Add or replace files in **`public/memories/`**. Filenames like `IMG_1234 Millie Wibert.jpeg` or `… Kurstin Shalawylo.mov` work well—the site strips camera/UUID prefixes and matches the **last two words** to **“First and Last Name”** on the form (with fuzzy matching, e.g. Millicent ↔ Millie when the last name matches).
 
-Optional: **`npm run sync:memories`** also downloads from the Dropbox folder when `DROPBOX_ACCESS_TOKEN` is set in `.env.local` (see `.env.example`).
+Optional: **`npm run sync:memories`** also downloads from the Dropbox folder when `DROPBOX_ACCESS_TOKEN` is set in `.env.local` (see `.env.example`). After a pull, run **`npm run optimize:memories`** to keep `public/memories/` smaller before committing.
+
+### Keeping the site light
+
+- **Build-time data:** The gallery is driven by committed CSV + static files under `public/memories/` (no runtime database).
+- **Thumbnails:** Carousel tiles use Next.js `Image` with `quality={75}` and `sizes` capped to the viewport width of the carousel (see `app/components/LeroyMemories.tsx`).
+- **Full-screen view:** The lightbox uses a plain `<img>` pointing at the same static URL (already bounded by the optimize script for photos; videos are unchanged and can be large).
+- **Gallery list:** Only **image** files appear in the photo grid; videos are not listed there (they stay in the folder for direct links if needed).
+- **Link preview:** `public/og.jpg` (1200×630) is regenerated when you run **`npm run optimize:memories`** from `leroy-hero.jpeg`. Set **`NEXT_PUBLIC_SITE_URL`** to your production URL so shared links resolve images correctly (see `.env.example`).
+- **Hero carousel:** `public/leroy-hero.jpeg` plus any images in **`public/hero-carousel/`** (e.g. family “Dad” album) appear as swipeable photos at the top of the page.
 
 ## Run locally
 
@@ -36,4 +46,5 @@ Import the repo and deploy. No environment variables are required if CSV and med
 - `npm run dev` — dev server  
 - `npm run build` — production build  
 - `npm run lint` — ESLint  
-- `npm run sync:memories` — optional cloud refresh  
+- `npm run sync:memories` — fetch sheet CSV; optional Dropbox download when token is set  
+- `npm run optimize:memories` — resize / recompress `public/memories/`, `public/hero-carousel/`, `public/leroy-hero.jpeg`, and write `public/og.jpg` for social previews  
