@@ -41,7 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Videos are not shipped: they blow past Vercel’s ~300MB serverless bundle limit for /api/memories
+# Videos are not shipped: they blow past Vercel’s serverless bundle limits when traced into routes
 # (Next traces public/memories into that function). Keep clips locally or host on YouTube/Drive.
 /public/memories/**/*.mp4
 /public/memories/**/*.mov

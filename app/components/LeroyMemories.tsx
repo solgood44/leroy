@@ -840,7 +840,7 @@ export function LeroyMemories({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/memories", { cache: "no-store" });
+        const res = await fetch("/memories-payload.json", { cache: "no-store" });
         const json: unknown = await res.json();
         if (!res.ok) {
           const msg =

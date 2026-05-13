@@ -4,7 +4,7 @@
  * Also writes public/og.jpg (1200×630) from leroy-hero.jpeg for link previews.
  * GIFs are skipped. (Videos are gitignored under public/memories/ — do not add them.)
  *
- * Defaults: long edge max 2048px, MozJPEG Q82. PNG with alpha stays PNG (compressed).
+ * Defaults: long edge max 1600px, MozJPEG Q78. PNG with alpha stays PNG (compressed).
  *
  * Usage:
  *   npm run optimize:memories           # optimize in place
@@ -16,8 +16,8 @@ import sharp from "sharp";
 
 const MEMORIES_ROOT = join(process.cwd(), "public", "memories");
 const HERO_CAROUSEL_ROOT = join(process.cwd(), "public", "hero-carousel");
-const MAX_LONG_EDGE = 2048;
-const JPEG_QUALITY = 82;
+const MAX_LONG_EDGE = 1600;
+const JPEG_QUALITY = 78;
 
 const VIDEO_RE = /\.(mp4|mov|webm)$/i;
 /** GIF skipped — animated/static GIF handling is unpredictable */
