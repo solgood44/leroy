@@ -11,7 +11,7 @@ GitHub Actions runs **Sync form submissions from Google Sheet** on a schedule an
 - **Manual run:** GitHub → Actions → that workflow → **Run workflow**.
 - **Override URL:** repo **Settings → Secrets and variables → Actions → Variables** → `GOOGLE_SHEET_CSV_URL` (optional).
 
-If **branch protection** blocks direct pushes to `main`, add an exception for `github-actions[bot]` or use a PAT secret—otherwise the commit step will fail.
+If new form rows appear in the Sheet but **not on the site**, check **GitHub → Actions → Sync form submissions** for failed runs. The job must be allowed to **push to `main`** (repo **Settings → Actions → General → Workflow permissions: Read and write**). A green run with “No changes” means the export matched the repo file already.
 
 ### Manual
 
