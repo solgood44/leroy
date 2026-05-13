@@ -72,7 +72,7 @@ export type MemoriesPayload = {
   formMessagesChronological: ChronologicalFormMessage[];
 };
 
-/** Images only — videos are not listed in the gallery (keeps deploy small). */
+/** Images only — video files are not supported in public/memories (Vercel bundle limit). */
 const IMAGE_RE = /\.(jpe?g|png|gif|webp|heic|avif|bmp|tif?f)$/i;
 
 const CSV_PATH = join(process.cwd(), "data", "memories", "submissions.csv");

@@ -1,6 +1,6 @@
 # LeRoy — memories
 
-A simple Next.js site: **photos and videos** from `public/memories/` are **grouped by person**. If they’re on the Google Form CSV, their notes appear; if not, the heading is **Photos from [name]** using the name parsed from the filename.
+A simple Next.js site: **photos** from `public/memories/` are **grouped by person**. If they’re on the Google Form CSV, their notes appear; if not, the heading is **Photos from [name]** using the name parsed from the filename. **Video files are not kept in the repo** (they break Vercel’s serverless size limit); use Dropbox or YouTube for clips if needed.
 
 ## Update the content
 
@@ -17,7 +17,7 @@ If new form rows or Dropbox photos are missing on the site, check **GitHub → A
 ### Manual
 
 1. Replace **`data/memories/submissions.csv`** with a fresh export from the Google Sheet (same columns: timestamp, name, message), or run **`npm run sync:memories`** locally (uses `GOOGLE_SHEET_CSV_URL` from `.env.local` or the default Sheet URL in `scripts/sync-memories.ts`).
-2. Add or replace files in **`public/memories/`**. Filenames like `IMG_1234 Millie Wibert.jpeg` or `… Kurstin Shalawylo.mov` work well—the site strips camera/UUID prefixes and matches the **last two words** to **“First and Last Name”** on the form (with fuzzy matching, e.g. Millicent ↔ Millie when the last name matches).
+2. Add or replace **image** files in **`public/memories/`** (JPEG/PNG/WebP, etc.). Filenames like `IMG_1234 Millie Wibert.jpeg` work well—the site strips camera/UUID prefixes and matches the **last two words** to **“First and Last Name”** on the form (with fuzzy matching, e.g. Millicent ↔ Millie when the last name matches).
 
 Optional: **`npm run sync:memories`** also downloads from the Dropbox folder when `DROPBOX_ACCESS_TOKEN` is set in `.env.local` (see `.env.example`). After a pull, run **`npm run optimize:memories`** to keep `public/memories/` smaller before committing.
 
@@ -25,8 +25,8 @@ Optional: **`npm run sync:memories`** also downloads from the Dropbox folder whe
 
 - **Build-time data:** The gallery is driven by committed CSV + static files under `public/memories/` (no runtime database).
 - **Thumbnails:** Carousel tiles use Next.js `Image` with `quality={75}` and `sizes` capped to the viewport width of the carousel (see `app/components/LeroyMemories.tsx`).
-- **Full-screen view:** The lightbox uses a plain `<img>` pointing at the same static URL (already bounded by the optimize script for photos; videos are unchanged and can be large).
-- **Gallery list:** Only **image** files appear in the photo grid; videos are not listed there (they stay in the folder for direct links if needed).
+- **Full-screen view:** The lightbox uses a plain `<img>` on the optimized static JPEG/PNG.
+- **Repo size / Vercel:** Only **images** live under `public/memories/`. **Do not commit `.mp4` / `.mov`** — they are gitignored and were bloating the `/api/memories` deployment (300MB limit).
 - **Link preview:** `public/og.jpg` (1200×630) is regenerated when you run **`npm run optimize:memories`** from `leroy-hero.jpeg`. Set **`NEXT_PUBLIC_SITE_URL`** to your production URL so shared links resolve images correctly (see `.env.example`).
 - **Hero carousel:** `public/leroy-hero.jpeg` plus any images in **`public/hero-carousel/`** (e.g. family “Dad” album) appear as swipeable photos at the top of the page.
 

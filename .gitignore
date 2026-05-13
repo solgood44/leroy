@@ -41,7 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Exceed GitHub 100MB file limit — keep copies locally or compress / host elsewhere
-/public/memories/LeRoy Harvey -Angel from Montgomery- Joe Dzenowagis.mp4
-/public/memories/LeRoy Harvey -Heart of Gold- Joe Dzenowagis.mp4
-/public/memories/LeRoy Harvey -Knights in White Satin- Joe Dzenowagis.mp4
+# Videos are not shipped: they blow past Vercel’s ~300MB serverless bundle limit for /api/memories
+# (Next traces public/memories into that function). Keep clips locally or host on YouTube/Drive.
+/public/memories/**/*.mp4
+/public/memories/**/*.mov
+/public/memories/**/*.webm
+/public/memories/**/*.m4v

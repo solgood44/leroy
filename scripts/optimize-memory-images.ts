@@ -2,7 +2,7 @@
  * Resize + recompress images under public/memories/, public/hero-carousel/,
  * and public/leroy-hero.jpeg to save repo & Vercel space.
  * Also writes public/og.jpg (1200×630) from leroy-hero.jpeg for link previews.
- * Videos (.mp4, .mov, .webm) are left unchanged. GIFs are skipped.
+ * GIFs are skipped. (Videos are gitignored under public/memories/ — do not add them.)
  *
  * Defaults: long edge max 2048px, MozJPEG Q82. PNG with alpha stays PNG (compressed).
  *

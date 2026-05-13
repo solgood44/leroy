@@ -1,7 +1,7 @@
 /**
  * Refresh local data used by the site:
  * 1. Downloads the Google Sheet as data/memories/submissions.csv
- * 2. If DROPBOX_ACCESS_TOKEN is set, downloads images from the shared folder into public/memories/
+ * 2. If DROPBOX_ACCESS_TOKEN is set, downloads images only (no video) from the shared folder into public/memories/
  *
  * Usage: npm run sync:memories
  * Optional .env.local: DROPBOX_ACCESS_TOKEN, DROPBOX_SHARED_FOLDER_URL, GOOGLE_SHEET_CSV_URL
