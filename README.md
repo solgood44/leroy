@@ -41,6 +41,8 @@ npm run dev
 
 Import the repo and deploy. No environment variables are required if CSV, `public/memories-payload.json`, `lib/heroCarouselManifest.generated.ts`, and media are committed.
 
+**If the build log shows `sh: tsx: command not found`:** Vercel (or another host) installed without devDependencies. This project keeps **`tsx` in `dependencies`** so `npm run build:memories-data` always runs before `next build`.
+
 **If a deploy fails on function size again:** In the Vercel project, add **`VERCEL_ANALYZE_BUILD_OUTPUT=1`**, redeploy, and read the build log for per-function size and the largest traced files. For Next.js you can also try **`VERCEL_BUILDER_DEBUG=1`** for extra size detail. That confirms whether the problem is still “static assets traced into a serverless route” vs a heavy `node_modules` dependency.
 
 **Why “optimize photos” alone wasn’t enough:** `public/` is served from the **CDN**, but **any server code that `readdir`s or reads those files** can make Next **trace the binaries into a serverless bundle** (300MB+ when `public/memories` was tied to an API route, and **~8MB+ of hero images** when `page.tsx` listed `public/hero-carousel` at build time). The site now uses **static `memories-payload.json` + a generated filename list** so server bundles stay tiny. **`npm run optimize:memories`** (long edge **1600px**, MozJPEG **Q78**) shrinks **git, bandwidth, and lightbox weight**.
