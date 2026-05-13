@@ -1,0 +1,55 @@
+# Pull latest form responses from the public Google Sheet CSV export every 6 hours
+# and commit data/memories/submissions.csv when it changes (triggers Vercel deploy).
+#
+# Sheet: https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/
+# The tab must be viewable by "Anyone with the link" (or published) so the export URL works.
+#
+# Optional: repository variable GOOGLE_SHEET_CSV_URL overrides the default export URL.
+
+name: Sync form submissions from Google Sheet
+
+on:
+  schedule:
+    # Every 6 hours (UTC): 00:00, 06:00, 12:00, 18:00
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-sheet-csv
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch CSV from Google Sheet
+        run: npm run sync:memories
+        env:
+          GOOGLE_SHEET_CSV_URL: ${{ vars.GOOGLE_SHEET_CSV_URL || 'https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/export?format=csv&gid=253822378' }}
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/memories/submissions.csv
+          if git diff --staged --quiet; then
+            echo "No changes to submissions.csv — sheet export matches repo."
+            exit 0
+          fi
+          git commit -m "chore: sync form submissions from Google Sheet"
+          git push

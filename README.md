@@ -4,10 +4,21 @@ A simple Next.js site: **photos and videos** from `public/memories/` are **group
 
 ## Update the content
 
-1. Replace **`data/memories/submissions.csv`** with a fresh export from the Google Sheet (same columns: timestamp, name, message).
+### Automatic (every 6 hours)
+
+GitHub Actions runs **Sync form submissions from Google Sheet** on a schedule and commits `data/memories/submissions.csv` when the [public CSV export](https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/export?format=csv&gid=253822378) changes (which triggers your usual deploy, e.g. Vercel). The sheet tab must be **viewable by anyone with the link** (or published) so the export URL works without the Sheets API.
+
+- **Manual run:** GitHub → Actions → that workflow → **Run workflow**.
+- **Override URL:** repo **Settings → Secrets and variables → Actions → Variables** → `GOOGLE_SHEET_CSV_URL` (optional).
+
+If **branch protection** blocks direct pushes to `main`, add an exception for `github-actions[bot]` or use a PAT secret—otherwise the commit step will fail.
+
+### Manual
+
+1. Replace **`data/memories/submissions.csv`** with a fresh export from the Google Sheet (same columns: timestamp, name, message), or run **`npm run sync:memories`** locally (uses `GOOGLE_SHEET_CSV_URL` from `.env.local` or the default Sheet URL in `scripts/sync-memories.ts`).
 2. Add or replace files in **`public/memories/`**. Filenames like `IMG_1234 Millie Wibert.jpeg` or `… Kurstin Shalawylo.mov` work well—the site strips camera/UUID prefixes and matches the **last two words** to **“First and Last Name”** on the form (with fuzzy matching, e.g. Millicent ↔ Millie when the last name matches).
 
-Optional: **`npm run sync:memories`** still pulls the default Sheet + Dropbox folder if you use a Dropbox token in `.env.local` (see `.env.example`).
+Optional: **`npm run sync:memories`** also downloads from the Dropbox folder when `DROPBOX_ACCESS_TOKEN` is set in `.env.local` (see `.env.example`).
 
 ## Run locally
 
