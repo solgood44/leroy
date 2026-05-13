@@ -83,7 +83,7 @@ async function optimizeOne(absPath: string, agg: Agg): Promise<void> {
     meta.hasAlpha === true ||
     (meta.channels === 4 && (extLower === ".png" || extLower === ".webp"));
 
-  let pipeline = sharp(input)
+  const pipeline = sharp(input)
     .rotate()
     .resize(MAX_LONG_EDGE, MAX_LONG_EDGE, {
       fit: "inside",

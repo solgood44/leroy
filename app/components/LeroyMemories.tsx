@@ -339,7 +339,9 @@ function FormFeedItem({
         ? photosRef.current
         : messageRef.current;
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setPendingScroll(null);
+    queueMicrotask(() => {
+      setPendingScroll(null);
+    });
   }, [expanded, pendingScroll]);
 
   const whenByFileId = album ? albumPhotoWhenMap(album) : new Map();
@@ -470,7 +472,9 @@ function FormFeedPhotoOnlyItem({
   useLayoutEffect(() => {
     if (!expanded || !pendingScroll) return;
     photosRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setPendingScroll(false);
+    queueMicrotask(() => {
+      setPendingScroll(false);
+    });
   }, [expanded, pendingScroll]);
 
   return (
