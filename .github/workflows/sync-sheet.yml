@@ -51,13 +51,16 @@ jobs:
         if: ${{ secrets.DROPBOX_ACCESS_TOKEN != '' }}
         run: npm run optimize:memories
 
+      - name: Build memories API payload (JSON only — keeps Vercel function small)
+        run: npm run build:memories-data
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/memories/submissions.csv public/memories/
+          git add data/memories/submissions.csv data/memories/payload.json public/memories/
           if git diff --staged --quiet; then
-            echo "No changes to sheet or public/memories/ — nothing to commit."
+            echo "No changes to sheet, payload, or public/memories/ — nothing to commit."
             exit 0
           fi
           git commit -m "chore: sync memories (sheet + photos)"

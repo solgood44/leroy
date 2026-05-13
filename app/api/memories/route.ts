@@ -1,23 +1,13 @@
-import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
-import { buildMemories } from "@/lib/memories";
+import type { MemoriesPayload } from "@/lib/memories";
+import memoriesPayload from "@/data/memories/payload.json";
 
-const getMemories = unstable_cache(
-  async () => buildMemories(),
-  ["leroy-memories-local-v25"],
-  { revalidate: 60 },
-);
+const data = memoriesPayload as MemoriesPayload;
 
 export async function GET() {
-  try {
-    const data = await getMemories();
-    return NextResponse.json(data, {
-      headers: {
-        "Cache-Control": "no-store",
-      },
-    });
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+  return NextResponse.json(data, {
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
 }

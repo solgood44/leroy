@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "build:memories-data": "tsx scripts/build-memories-data.ts",
+    "dev": "npm run build:memories-data && next dev",
+    "build": "npm run build:memories-data && next build",
     "start": "next start",
     "lint": "eslint",
     "sync:memories": "tsx scripts/sync-memories.ts",
