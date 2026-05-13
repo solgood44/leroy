@@ -4,19 +4,9 @@ A simple Next.js site: **photos** from `public/memories/` are **grouped by perso
 
 ## Update the content
 
-### Automatic (every 6 hours)
+There is **no GitHub Actions automation** in this repo—refresh data on your machine, then commit and push (Vercel deploys from `main`).
 
-GitHub Actions runs **Sync form submissions from Google Sheet** on a schedule. It always fetches the [public CSV export](https://docs.google.com/spreadsheets/d/1GYhHVkTpQtcXTEMUFjQHCs0DgRfA-VS8dFhuCDRB7Dw/export?format=csv&gid=253822378) into `data/memories/submissions.csv`. If you add a **repository secret** `DROPBOX_ACCESS_TOKEN` (Dropbox app token with `files.content.read`), the same job also downloads images from the shared album into `public/memories/`, runs **`npm run optimize:memories`**, then **`npm run build:memories-data`** (writes **`public/memories-payload.json`** and **`lib/heroCarouselManifest.generated.ts`**), and commits when anything changes. The sheet tab must be **viewable by anyone with the link** (or published) so the export URL works without the Sheets API.
-
-- **Manual run:** GitHub → Actions → that workflow → **Run workflow**.
-- **Override URLs:** Actions **Variables** → `GOOGLE_SHEET_CSV_URL` and/or `DROPBOX_SHARED_FOLDER_URL` (optional; the repo default folder URL matches the current shared album link).
-- **Dropbox token:** Actions **Secrets** → `DROPBOX_ACCESS_TOKEN`. Omit it to keep CI sheet-only (no photo sync in CI). Dropbox short-lived tokens expire; refresh the secret when downloads start failing with 401.
-
-If new form rows or Dropbox photos are missing on the site, check **GitHub → Actions → Sync form submissions** for failed runs. The job must be allowed to **push to `main`** (repo **Settings → Actions → General → Workflow permissions: Read and write**). A green run with “No changes” means the sheet export, `public/memories-payload.json`, `lib/heroCarouselManifest.generated.ts`, and `public/memories/` already matched what CI pulled.
-
-### Manual
-
-1. Replace **`data/memories/submissions.csv`** with a fresh export from the Google Sheet (same columns: timestamp, name, message), or run **`npm run sync:memories`** locally (uses `GOOGLE_SHEET_CSV_URL` from `.env.local` or the default Sheet URL in `scripts/sync-memories.ts`).
+1. Replace **`data/memories/submissions.csv`** with a fresh export from the Google Sheet (same columns: timestamp, name, message), or run **`npm run sync:memories`** locally (uses `GOOGLE_SHEET_CSV_URL` from `.env.local` or the default public CSV export in `scripts/sync-memories.ts`; the sheet tab must stay **viewable by anyone with the link** if you rely on that URL).
 2. Add or replace **image** files in **`public/memories/`** (JPEG/PNG/WebP, etc.). Filenames like `IMG_1234 Millie Wibert.jpeg` work well—the site strips camera/UUID prefixes and matches the **last two words** to **“First and Last Name”** on the form (with fuzzy matching, e.g. Millicent ↔ Millie when the last name matches).
 
 Optional: **`npm run sync:memories`** also downloads from the Dropbox folder when `DROPBOX_ACCESS_TOKEN` is set in `.env.local` (see `.env.example`). After a pull, run **`npm run optimize:memories`**, then **`npm run build:memories-data`** so `public/memories-payload.json` and the hero filename manifest match the folders before you commit.
