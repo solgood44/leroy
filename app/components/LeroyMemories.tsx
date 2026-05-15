@@ -28,7 +28,6 @@ const LINKS = {
   messageForm: "https://forms.gle/C2htuJ35AatoW2rh8",
   dropboxUpload: "https://www.dropbox.com/request/s6bnleq9kf4agf37k1bf",
   facebookPost: "https://www.facebook.com/share/p/17HpPURTMR/",
-  emailLeRoy: "mailto:harvey48823@gmail.com",
 } as const;
 
 function Lightbox({
@@ -702,13 +701,11 @@ function FamilyUpdatePanel() {
             able.
           </p>
           <p>
-            If you&apos;d like to reach out, he&apos;s open to emails at{" "}
-            <a href={LINKS.emailLeRoy}>harvey48823@gmail.com</a>. In the last few
-            days there have been improvements in his mental state and he is
-            able to have conversations. He is also looking forward to getting
-            home and getting back to some sense of normalcy. You can also reach
-            out to us directly. We appreciate your patience as we do our best
-            to respond.
+            If you&apos;d like to reach out, please connect with us directly. In
+            the last few days there have been improvements in his mental state
+            and he is able to have conversations. He is also looking forward to
+            getting home and getting back to some sense of normalcy. We
+            appreciate your patience as we do our best to respond.
           </p>
           <p>
             We feel truly blessed for the outpouring of support and love that
@@ -844,25 +841,6 @@ function QuickActions() {
             </span>
           </a>
         </li>
-        <li>
-          <a
-            className="leroy-action-card"
-            href={LINKS.emailLeRoy}
-          >
-            <span className="leroy-action-icon" aria-hidden>
-              📧
-            </span>
-            <span className="leroy-action-text">
-              <span className="leroy-action-title">Email LeRoy</span>
-              <span className="leroy-action-desc">
-                harvey48823@gmail.com — opens your mail app
-              </span>
-            </span>
-            <span className="leroy-action-arrow" aria-hidden>
-              →
-            </span>
-          </a>
-        </li>
       </ul>
     </nav>
   );
@@ -975,10 +953,6 @@ export function LeroyMemories({
         </div>
         <h1>LeRoy Harvey III</h1>
         <p className="tag">A place for memories, photos, and words of love</p>
-        <p className="leroy-hero-email">
-          You can also reach him by email at{" "}
-          <a href={LINKS.emailLeRoy}>harvey48823@gmail.com</a>.
-        </p>
       </header>
 
       <FamilySupportNotice />
