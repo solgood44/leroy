@@ -29,6 +29,8 @@ const LINKS = {
   dropboxUpload: "https://www.dropbox.com/request/s6bnleq9kf4agf37k1bf",
   facebookPost: "https://www.facebook.com/share/p/17HpPURTMR/",
   emailLeRoy: "mailto:harvey48823@gmail.com",
+  /** PayPal “chip in” / donation link for the family */
+  paypalDonation: "https://www.paypal.com/ncp/payment/XJ3MEHUURQCWC",
 } as const;
 
 function Lightbox({
@@ -726,6 +728,29 @@ function FamilyUpdatePanel() {
   );
 }
 
+function DonateCallout() {
+  return (
+    <section className="leroy-donate" aria-label="Support the family">
+      <div className="leroy-donate-inner">
+        <p className="leroy-donate-copy">
+          If you&apos;d like to pitch in toward{" "}
+          <strong>comfort and care expenses</strong>, you can contribute
+          securely through PayPal—there&apos;s no obligation; every bit of support
+          is deeply appreciated.
+        </p>
+        <a
+          className="leroy-donate-btn"
+          href={LINKS.paypalDonation}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Give with PayPal
+        </a>
+      </div>
+    </section>
+  );
+}
+
 function QuickActions() {
   return (
     <nav className="leroy-actions" aria-label="Ways to connect">
@@ -949,6 +974,8 @@ export function LeroyMemories({
       <QuickActions />
 
       <FamilyUpdatePanel />
+
+      <DonateCallout />
 
       {data && mergedFeed.length > 0 ? (
         <FormMessagesFeed
