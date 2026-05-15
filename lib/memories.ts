@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 import {
   displayNameFromFilename,
@@ -6,6 +6,7 @@ import {
   pickBestPersonMatch,
   type ScoredPerson,
 } from "./nameMatch";
+import { resolvePhotoTakenMs } from "./photoTakenMs";
 import { groupSubmissionsByPerson, parseFormSheetCsv, submissionTimeMs } from "./sheet";
 
 /** One image file (no form text — that lives on the person album). */
@@ -15,9 +16,10 @@ export type MemoryFile = {
   url: string;
 };
 
-type MediaWithMtime = {
+type MediaWithTaken = {
   file: MemoryFile;
-  mtimeMs: number;
+  /** Capture time for sorting (0 = unknown → sorts last) */
+  takenMs: number;
 };
 
 export type AlbumTimelinePhoto = {
@@ -90,13 +92,13 @@ function maxTimestampMs(
 }
 
 async function listMemoryMedia(): Promise<
-  { relPath: string; baseName: string; mtimeMs: number }[]
+  { relPath: string; baseName: string; takenMs: number }[]
 > {
   async function walk(
     dir: string,
     prefix: string,
-  ): Promise<{ relPath: string; baseName: string; mtimeMs: number }[]> {
-    const out: { relPath: string; baseName: string; mtimeMs: number }[] = [];
+  ): Promise<{ relPath: string; baseName: string; takenMs: number }[]> {
+    const out: { relPath: string; baseName: string; takenMs: number }[] = [];
     let entries;
     try {
       entries = await readdir(dir, { withFileTypes: true });
@@ -110,8 +112,8 @@ async function listMemoryMedia(): Promise<
       if (e.isDirectory()) {
         out.push(...(await walk(full, rel)));
       } else if (e.isFile() && IMAGE_RE.test(e.name)) {
-        const st = await stat(full);
-        out.push({ relPath: rel, baseName: e.name, mtimeMs: Math.round(st.mtimeMs) });
+        const takenMs = await resolvePhotoTakenMs(MEMORIES_PUBLIC_DIR, rel, e.name);
+        out.push({ relPath: rel, baseName: e.name, takenMs });
       }
     }
     return out;
@@ -119,16 +121,16 @@ async function listMemoryMedia(): Promise<
   return walk(MEMORIES_PUBLIC_DIR, "");
 }
 
-function sortMediaNewestFirst(items: MediaWithMtime[]): MemoryFile[] {
+function sortMediaNewestFirst(items: MediaWithTaken[]): MemoryFile[] {
   items.sort((a, b) => {
-    if (b.mtimeMs !== a.mtimeMs) return b.mtimeMs - a.mtimeMs;
+    if (b.takenMs !== a.takenMs) return b.takenMs - a.takenMs;
     return b.file.fileName.localeCompare(a.file.fileName);
   });
   return items.map((x) => x.file);
 }
 
-function albumRecencyMs(media: MediaWithMtime[], submissions: { timestamp: string }[]): number {
-  const mt = media.length ? Math.max(...media.map((x) => x.mtimeMs)) : 0;
+function albumRecencyMs(media: MediaWithTaken[], submissions: { timestamp: string }[]): number {
+  const mt = media.length ? Math.max(...media.map((x) => x.takenMs)) : 0;
   return Math.max(mt, maxTimestampMs(submissions));
 }
 
@@ -174,16 +176,21 @@ function buildFormMessagesChronological(
   return rows;
 }
 
+function formatPhotoWhen(takenMs: number): string {
+  if (takenMs <= 0) return "Date unknown";
+  return formatTimelineWhen(takenMs);
+}
+
 function buildTimeline(
-  tagged: MediaWithMtime[],
+  tagged: MediaWithTaken[],
   submissions: import("./sheet").SheetSubmission[],
 ): AlbumTimelineEntry[] {
   const entries: AlbumTimelineEntry[] = [];
-  for (const { file, mtimeMs } of tagged) {
+  for (const { file, takenMs } of tagged) {
     entries.push({
       kind: "photo",
-      sortKeyMs: mtimeMs,
-      when: formatTimelineWhen(mtimeMs),
+      sortKeyMs: takenMs,
+      when: formatPhotoWhen(takenMs),
       file,
     });
   }
@@ -230,11 +237,11 @@ export async function buildMemories(): Promise<MemoriesPayload> {
 
   const files = await listMemoryMedia();
 
-  const byPerson = new Map<string, MediaWithMtime[]>();
-  const byFilenameName = new Map<string, MediaWithMtime[]>();
-  const unmatchedTagged: MediaWithMtime[] = [];
+  const byPerson = new Map<string, MediaWithTaken[]>();
+  const byFilenameName = new Map<string, MediaWithTaken[]>();
+  const unmatchedTagged: MediaWithTaken[] = [];
 
-  for (const { relPath, baseName, mtimeMs } of files) {
+  for (const { relPath, baseName, takenMs } of files) {
     const match = pickBestPersonMatch(baseName, scoredPeople, 55);
     const group = match
       ? people.find((p) => p.key === match.person.key)
@@ -245,7 +252,7 @@ export async function buildMemories(): Promise<MemoriesPayload> {
       fileName: relPath,
       url: publicUrlForMemory(relPath),
     };
-    const tagged: MediaWithMtime = { file, mtimeMs };
+    const tagged: MediaWithTaken = { file, takenMs };
 
     if (match && group) {
       const key = group.key;

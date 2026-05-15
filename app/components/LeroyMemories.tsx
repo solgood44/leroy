@@ -897,6 +897,9 @@ export function LeroyMemories({
       });
     }
     rows.sort((a, b) => {
+      const aUnknown = a.sortKeyMs <= 0;
+      const bUnknown = b.sortKeyMs <= 0;
+      if (aUnknown !== bUnknown) return aUnknown ? 1 : -1;
       if (b.sortKeyMs !== a.sortKeyMs) return b.sortKeyMs - a.sortKeyMs;
       if (a.kind !== b.kind) return a.kind === "message" ? -1 : 1;
       return a.key.localeCompare(b.key);

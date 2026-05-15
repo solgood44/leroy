@@ -100,6 +100,7 @@ async function optimizeOne(absPath: string, agg: Agg): Promise<void> {
     outBuf = await pipeline
       .flatten({ background: { r: 255, g: 255, b: 255 } })
       .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
+      .withMetadata()
       .toBuffer();
     outExt = jpegExtFor(ext);
   }
