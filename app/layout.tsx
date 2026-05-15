@@ -18,9 +18,9 @@ const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
-const title = "LeRoy Harvey — memories & updates";
+const title = "LeRoy Harvey III — memories & updates";
 const description =
-  "Family updates, photos, and messages for LeRoy Harvey. Leave a note, share a photo, or read words from friends and family.";
+  "Family updates, photos, and messages for LeRoy Harvey III. Leave a note, share a photo, or read words from friends and family.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
         url: "/og.jpg",
         width: 1200,
         height: 630,
-        alt: "LeRoy Harvey",
+        alt: "LeRoy Harvey III",
       },
     ],
   },

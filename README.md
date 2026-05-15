@@ -1,4 +1,4 @@
-# LeRoy — memories
+# LeRoy Harvey III — memories
 
 A simple Next.js site: **photos** from `public/memories/` are **grouped by person**. If they’re on the Google Form CSV, their notes appear; if not, the heading is **Photos from [name]** using the name parsed from the filename. **Video files are not kept in the repo** (they break Vercel’s serverless size limit); use Dropbox or YouTube for clips if needed.
 

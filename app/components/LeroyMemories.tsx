@@ -665,7 +665,7 @@ function FamilyUpdatePanel() {
           <div className="leroy-update-letter">
             <p className="leroy-update-salutation">Dear friends and family,</p>
           <p>
-            We wanted to share an update about our dad, LeRoy Harvey. He was
+            We wanted to share an update about our dad, LeRoy Harvey III. He was
             admitted to the hospital last week after some confusion, and recent
             MRI scans showed changes in his brain that have shifted things more
             quickly than we expected. For now, he has chosen to transition back
@@ -923,12 +923,12 @@ export function LeroyMemories({
           <PhotoCarousel
             media={heroMedia}
             whenByFileId={new Map()}
-            albumLabel="LeRoy"
+            albumLabel="LeRoy Harvey III"
             onOpen={(url, label) => setLightbox({ url, label })}
             firstSlidePriority
           />
         </div>
-        <h1>LeRoy Harvey</h1>
+        <h1>LeRoy Harvey III</h1>
         <p className="tag">A place for memories, photos, and words of love</p>
         <p className="leroy-hero-email">
           You can also reach him by email at{" "}
