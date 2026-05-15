@@ -104,6 +104,82 @@ body {
   line-height: 1.6;
 }
 
+/* ——— Family support (optional donations) ——— */
+.leroy-support {
+  margin-bottom: 2.25rem;
+  padding: 1.35rem 1.4rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    120deg,
+    rgba(107, 83, 68, 0.07) 0%,
+    var(--surface) 48%,
+    rgba(255, 252, 248, 0.98) 100%
+  );
+  box-shadow: 0 2px 16px rgba(28, 26, 23, 0.05);
+}
+
+.leroy-support-intro {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.62;
+  max-width: 40rem;
+}
+
+.leroy-support-soft {
+  margin: 0 0 1.2rem;
+  font-size: 0.92rem;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 38rem;
+}
+
+.leroy-support-form {
+  margin: 0;
+  position: relative;
+}
+
+.leroy-support-donate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fffcf8;
+  font-weight: 650;
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid rgba(28, 26, 23, 0.12);
+  transition: transform 0.16s ease, box-shadow 0.16s ease,
+    background-color 0.16s ease;
+}
+
+.leroy-support-donate-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(107, 83, 68, 0.28);
+  background: #5a4538;
+}
+
+.leroy-support-donate-btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.leroy-support-pixel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ——— Quick actions ——— */
 .leroy-actions {
   margin-bottom: 2rem;

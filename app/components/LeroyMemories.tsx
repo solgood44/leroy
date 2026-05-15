@@ -726,6 +726,51 @@ function FamilyUpdatePanel() {
   );
 }
 
+function FamilySupportNotice() {
+  return (
+    <section className="leroy-support" aria-label="How to help the family">
+      <p className="leroy-support-intro">
+        As we support our dad through end-of-life care, many friends and family
+        have asked how they can help. Donations will help with caregiving,
+        travel, meals, medical, and memorial expenses during this time. We are
+        deeply grateful for the love, prayers, kindness, and support shown to our
+        family.
+      </p>
+      <p className="leroy-support-soft">
+        There is absolutely no pressure—sharing a note or a photo is a gift in
+        itself. If you’d like to contribute financially, you can use PayPal
+        below.
+      </p>
+      <form
+        className="leroy-support-form"
+        action="https://www.paypal.com/donate"
+        method="post"
+        target="_top"
+      >
+        <input type="hidden" name="business" value="8LL24B2TYM8H4" />
+        <input type="hidden" name="no_recurring" value="0" />
+        <input
+          type="hidden"
+          name="item_name"
+          value="Supporting our family through our dad's end-of-life care, travel, meals, and memorial expenses. Thank you."
+        />
+        <input type="hidden" name="currency_code" value="USD" />
+        <button type="submit" className="leroy-support-donate-btn">
+          Donate with PayPal
+        </button>
+        {/* eslint-disable-next-line @next/next/no-img-element -- PayPal 1×1 tracking pixel */}
+        <img
+          src="https://www.paypal.com/en_US/i/scr/pixel.gif"
+          alt=""
+          width={1}
+          height={1}
+          className="leroy-support-pixel"
+        />
+      </form>
+    </section>
+  );
+}
+
 function QuickActions() {
   return (
     <nav className="leroy-actions" aria-label="Ways to connect">
@@ -935,6 +980,8 @@ export function LeroyMemories({
           <a href={LINKS.emailLeRoy}>harvey48823@gmail.com</a>.
         </p>
       </header>
+
+      <FamilySupportNotice />
 
       {error ? (
         <p className="leroy-banner leroy-banner--error" role="alert">
