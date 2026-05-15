@@ -826,7 +826,7 @@ function QuickActions() {
 export function LeroyMemories({
   heroCarouselUrls,
 }: {
-  /** First slide is typically /leroy-hero.jpeg; rest e.g. /hero-carousel/dad-000.jpeg */
+  /** First slide is set in build (see heroCarouselManifest); often a priority image for LCP. */
   heroCarouselUrls: string[];
 }) {
   const [data, setData] = useState<MemoriesPayload | null>(null);
