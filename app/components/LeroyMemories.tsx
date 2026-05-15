@@ -955,8 +955,6 @@ export function LeroyMemories({
         <p className="tag">A place for memories, photos, and words of love</p>
       </header>
 
-      <FamilySupportNotice />
-
       {error ? (
         <p className="leroy-banner leroy-banner--error" role="alert">
           {error}
@@ -968,6 +966,8 @@ export function LeroyMemories({
       ) : null}
 
       <QuickActions />
+
+      <FamilySupportNotice />
 
       <FamilyUpdatePanel />
 
@@ -985,8 +985,8 @@ export function LeroyMemories({
             <h2 className="leroy-section-title">Photos &amp; messages</h2>
             <p className="leroy-section-sub">
               <strong>Posts</strong> are newest first—open a row for the full
-              note and any matched photos. Family news and ways to reach out are
-              above.
+              note and any matched photos. Family updates, ways to reach out, and
+              an optional contribution link are above.
             </p>
           </section>
 
