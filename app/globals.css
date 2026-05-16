@@ -96,6 +96,7 @@ body {
   padding: 1.35rem 1.4rem;
   border-radius: 14px;
   border: 1px solid var(--border);
+  text-align: center;
   background: linear-gradient(
     120deg,
     rgba(107, 83, 68, 0.07) 0%,
@@ -106,7 +107,7 @@ body {
 }
 
 .leroy-support-intro {
-  margin: 0 0 1rem;
+  margin: 0 auto 1rem;
   font-size: 1rem;
   color: var(--text);
   line-height: 1.62;
@@ -114,7 +115,7 @@ body {
 }
 
 .leroy-support-soft {
-  margin: 0 0 1.2rem;
+  margin: 0 auto 1.2rem;
   font-size: 0.92rem;
   color: var(--muted);
   line-height: 1.55;
@@ -124,6 +125,9 @@ body {
 .leroy-support-form {
   margin: 0;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .leroy-support-donate-btn {
@@ -192,20 +196,27 @@ body {
   padding: 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.75rem;
+}
+
+.leroy-actions-list > li {
+  width: 100%;
+  max-width: 26rem;
 }
 
 @media (min-width: 768px) {
   .leroy-actions-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
   }
-}
 
-@media (min-width: 1024px) {
-  .leroy-actions-list {
-    grid-template-columns: repeat(4, 1fr);
+  .leroy-actions-list > li {
+    flex: 1 1 240px;
+    max-width: 320px;
+    width: auto;
   }
 }
 
