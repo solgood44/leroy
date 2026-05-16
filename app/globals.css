@@ -90,6 +90,63 @@ body {
   line-height: 1.6;
 }
 
+/* ——— Featured music (YouTube) ——— */
+.leroy-featured-music {
+  margin-bottom: 2.25rem;
+  padding: 1.35rem 1.4rem 1.4rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.leroy-featured-music-title {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.leroy-featured-music-video {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto 1rem;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #1c1a17;
+  box-shadow: 0 2px 16px rgba(28, 26, 23, 0.08);
+}
+
+.leroy-featured-music-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.leroy-featured-music-copy {
+  margin: 0 auto;
+  max-width: 36rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.leroy-featured-music-copy a {
+  color: var(--accent);
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+
+.leroy-featured-music-copy a:hover {
+  text-decoration: underline;
+}
+
 /* ——— Family support (optional donations) ——— */
 .leroy-support {
   margin-bottom: 2.25rem;

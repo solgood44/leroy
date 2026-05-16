@@ -29,7 +29,11 @@ const LINKS = {
   dropboxUpload: "https://www.dropbox.com/request/s6bnleq9kf4agf37k1bf",
   facebookPost: "https://www.facebook.com/share/p/17HpPURTMR/",
   venmoDonation: "https://account.venmo.com/u/LeRoy-Harvey-3",
+  featuredYoutubeVideo: "https://www.youtube.com/watch?v=qTXN_A8bUyI",
+  leroyYoutubeChannel: "https://www.youtube.com/@LeRoyHarveyIII/videos",
 } as const;
+
+const FEATURED_YOUTUBE_ID = "qTXN_A8bUyI";
 
 function Lightbox({
   item,
@@ -601,6 +605,35 @@ function FormMessagesFeed({
   );
 }
 
+function FeaturedMusic() {
+  return (
+    <section className="leroy-featured-music" aria-label="Featured music">
+      <h2 className="leroy-featured-music-title">Music from LeRoy</h2>
+      <div className="leroy-featured-music-video">
+        <iframe
+          src={`https://www.youtube.com/embed/${FEATURED_YOUTUBE_ID}`}
+          title="Featured video — LeRoy Harvey III on YouTube"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+        />
+      </div>
+      <p className="leroy-featured-music-copy">
+        If you want to see more of what LeRoy has been up to with music and his
+        new thought dialog series, you can explore his{" "}
+        <a
+          href={LINKS.leroyYoutubeChannel}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          YouTube channel
+        </a>
+        .
+      </p>
+    </section>
+  );
+}
+
 function FamilyUpdatePanel() {
   const [earlierOpen, setEarlierOpen] = useState(false);
 
@@ -1027,6 +1060,8 @@ export function LeroyMemories({
         <h1>LeRoy Harvey III</h1>
         <p className="tag">A place for memories, photos, and words of love</p>
       </header>
+
+      <FeaturedMusic />
 
       {error ? (
         <p className="leroy-banner leroy-banner--error" role="alert">
