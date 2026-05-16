@@ -28,6 +28,7 @@ const LINKS = {
   messageForm: "https://forms.gle/C2htuJ35AatoW2rh8",
   dropboxUpload: "https://www.dropbox.com/request/s6bnleq9kf4agf37k1bf",
   facebookPost: "https://www.facebook.com/share/p/17HpPURTMR/",
+  venmoDonation: "https://account.venmo.com/u/LeRoy-Harvey-3",
 } as const;
 
 function Lightbox({
@@ -735,35 +736,45 @@ function FamilySupportNotice() {
       </p>
       <p className="leroy-support-soft">
         There is absolutely no pressure—sharing a note or a photo is a gift in
-        itself. If you&apos;d like to contribute financially, you can use the
-        button below.
+        itself. If you&apos;d like to contribute financially, you can donate
+        with PayPal or Venmo using the buttons below.
       </p>
-      <form
-        className="leroy-support-form"
-        action="https://www.paypal.com/donate"
-        method="post"
-        target="_top"
-      >
-        <input type="hidden" name="business" value="8LL24B2TYM8H4" />
-        <input type="hidden" name="no_recurring" value="0" />
-        <input
-          type="hidden"
-          name="item_name"
-          value="Supporting our family through our dad's end-of-life care, travel, meals, and memorial expenses. Thank you."
-        />
-        <input type="hidden" name="currency_code" value="USD" />
-        <button type="submit" className="leroy-support-donate-btn">
-          Donate
-        </button>
-        {/* eslint-disable-next-line @next/next/no-img-element -- PayPal 1×1 tracking pixel */}
-        <img
-          src="https://www.paypal.com/en_US/i/scr/pixel.gif"
-          alt=""
-          width={1}
-          height={1}
-          className="leroy-support-pixel"
-        />
-      </form>
+      <div className="leroy-support-donate-actions">
+        <form
+          className="leroy-support-form"
+          action="https://www.paypal.com/donate"
+          method="post"
+          target="_top"
+        >
+          <input type="hidden" name="business" value="8LL24B2TYM8H4" />
+          <input type="hidden" name="no_recurring" value="0" />
+          <input
+            type="hidden"
+            name="item_name"
+            value="Supporting our family through our dad's end-of-life care, travel, meals, and memorial expenses. Thank you."
+          />
+          <input type="hidden" name="currency_code" value="USD" />
+          <button type="submit" className="leroy-support-donate-btn">
+            Donate with PayPal
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element -- PayPal 1×1 tracking pixel */}
+          <img
+            src="https://www.paypal.com/en_US/i/scr/pixel.gif"
+            alt=""
+            width={1}
+            height={1}
+            className="leroy-support-pixel"
+          />
+        </form>
+        <a
+          className="leroy-support-donate-btn leroy-support-donate-btn--venmo"
+          href={LINKS.venmoDonation}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Donate with Venmo
+        </a>
+      </div>
     </section>
   );
 }
