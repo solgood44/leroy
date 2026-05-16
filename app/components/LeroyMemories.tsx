@@ -738,11 +738,6 @@ function FamilySupportNotice() {
         itself. If you&apos;d like to contribute financially, you can use the
         button below.
       </p>
-      <p className="leroy-support-pay-hint">
-        Donations run through PayPal, but you don&apos;t need a PayPal
-        account—you can donate with a debit or credit card by choosing that
-        option on the next page.
-      </p>
       <form
         className="leroy-support-form"
         action="https://www.paypal.com/donate"
@@ -758,7 +753,7 @@ function FamilySupportNotice() {
         />
         <input type="hidden" name="currency_code" value="USD" />
         <button type="submit" className="leroy-support-donate-btn">
-          Donate with PayPal
+          Donate
         </button>
         {/* eslint-disable-next-line @next/next/no-img-element -- PayPal 1×1 tracking pixel */}
         <img
