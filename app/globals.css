@@ -122,6 +122,15 @@ body {
   max-width: 38rem;
 }
 
+.leroy-support-pay-hint {
+  margin: 0 auto 1.15rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: 34rem;
+  font-style: normal;
+}
+
 .leroy-support-form {
   margin: 0;
   position: relative;

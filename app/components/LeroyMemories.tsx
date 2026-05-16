@@ -735,8 +735,13 @@ function FamilySupportNotice() {
       </p>
       <p className="leroy-support-soft">
         There is absolutely no pressure—sharing a note or a photo is a gift in
-        itself. If you’d like to contribute financially, you can use PayPal
-        below.
+        itself. If you&apos;d like to contribute financially, you can use the
+        button below.
+      </p>
+      <p className="leroy-support-pay-hint">
+        Donations run through PayPal, but you don&apos;t need a PayPal
+        account—you can donate with a debit or credit card by choosing that
+        option on the next page.
       </p>
       <form
         className="leroy-support-form"
