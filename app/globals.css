@@ -335,6 +335,29 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+.leroy-update-archive .leroy-update-entry--archived {
+  padding: 1.15rem 1.25rem 1.35rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.leroy-update-archive .leroy-update-entry--archived:last-child {
+  border-bottom: none;
+}
+
+.leroy-update-letter a {
+  color: var(--accent);
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+
+.leroy-update-letter a:hover {
+  text-decoration: underline;
+}
+
+#posts {
+  scroll-margin-top: 1.25rem;
+}
+
 .leroy-update-entry-head {
   display: flex;
   flex-wrap: wrap;

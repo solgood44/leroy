@@ -560,7 +560,11 @@ function FormMessagesFeed({
 }) {
   if (entries.length === 0) return null;
   return (
-    <section className="leroy-form-feed" aria-label="Posts from friends and family">
+    <section
+      id="posts"
+      className="leroy-form-feed"
+      aria-label="Posts from friends and family"
+    >
       <h2 className="leroy-form-feed-title">Posts</h2>
       <p className="leroy-form-feed-sub">
         <strong>Newest at the top.</strong> Each row is <strong>who</strong> and{" "}
@@ -612,27 +616,42 @@ function FamilyUpdatePanel() {
 
       <article className="leroy-update-entry leroy-update-entry--current">
         <header className="leroy-update-entry-head">
-          <h3 className="leroy-update-entry-title">Update 5/12</h3>
-          <time className="leroy-update-entry-date" dateTime="2026-05-12">
-            May 12, 2026
+          <h3 className="leroy-update-entry-title">Update 5/16</h3>
+          <time className="leroy-update-entry-date" dateTime="2026-05-16">
+            May 16, 2026
           </time>
         </header>
         <div className="leroy-update-letter">
           <p>
-            We wanted to share a brief update for friends and family who are
-            asking. LeRoy is still cozy at home in East Lansing, and is being
-            cared for by a hospice team along with his son and daughter. The
-            hospice team has been amazing, and we are grateful for their
-            support.
+            We wanted to share another update on social media as well, as many
+            people have been reaching out and asking how he&apos;s doing.
+            Currently, he is still receiving hospice care at home after we
+            found out he had a return of brain cancer four weeks ago. He has not
+            eaten for over a week and has been mostly in bed. With that said,
+            his spirit is still shining bright, he still knows who we are, and
+            he is responsive to questions—but very low energy and mostly
+            resting peacefully with his eyes closed. He is also singing along
+            to lyrics when people play him music, and is often smiling and as
+            sweet as ever.
           </p>
           <p>
-            LeRoy has been very peaceful and still has a great sense of humor.
-            He is open to visitors, but we ask that you check in beforehand to
-            ensure the timing will work.
+            He is not answering email, calls, or texts, but we are checking his
+            phone to convey messages as needed.
           </p>
           <p>
-            Thank you to everyone who has reached out with support, food,
-            prayers, and more.
+            Throughout the last few weeks we have received hundreds of messages,
+            donations, and dinners from all of you, and we have tried to ensure
+            he receives them. The hospice nurse informed us that hearing is one
+            of the last senses to go during the end of life, so please continue
+            to send messages as you feel inspired. You can read notes and see
+            photos in the{" "}
+            <a href="#posts">Posts</a> section below. This has all happened so
+            quickly, and we are doing our best to process this and respond to
+            everyone—we know there are so many people who love him.
+          </p>
+          <p>
+            One way you can help right now is to share this website with anyone
+            you know who loves him.
           </p>
           <p className="leroy-update-signoff">
             With love,
@@ -651,7 +670,7 @@ function FamilyUpdatePanel() {
           aria-controls="family-update-earlier"
         >
           <span className="leroy-update-archive-label">
-            Earlier update · May 5, 2026
+            Earlier updates · May 12 and May 5, 2026
           </span>
           <span className="leroy-update-chevron" aria-hidden>
             {earlierOpen ? "−" : "+"}
@@ -662,7 +681,49 @@ function FamilyUpdatePanel() {
           className="leroy-update-body"
           hidden={!earlierOpen}
         >
-          <div className="leroy-update-letter">
+          <article className="leroy-update-entry leroy-update-entry--archived">
+            <header className="leroy-update-entry-head">
+              <h3 className="leroy-update-entry-title">Update 5/12</h3>
+              <time
+                className="leroy-update-entry-date"
+                dateTime="2026-05-12"
+              >
+                May 12, 2026
+              </time>
+            </header>
+            <div className="leroy-update-letter">
+              <p>
+                We wanted to share a brief update for friends and family who are
+                asking. LeRoy is still cozy at home in East Lansing, and is being
+                cared for by a hospice team along with his son and daughter. The
+                hospice team has been amazing, and we are grateful for their
+                support.
+              </p>
+              <p>
+                LeRoy has been very peaceful and still has a great sense of humor.
+                He is open to visitors, but we ask that you check in beforehand to
+                ensure the timing will work.
+              </p>
+              <p>
+                Thank you to everyone who has reached out with support, food,
+                prayers, and more.
+              </p>
+              <p className="leroy-update-signoff">
+                With love,
+                <br />
+                Molly and Solomon &lt;3
+              </p>
+            </div>
+          </article>
+
+          <article className="leroy-update-entry leroy-update-entry--archived">
+            <header className="leroy-update-entry-head">
+              <h3 className="leroy-update-entry-title">Update 5/5</h3>
+              <time className="leroy-update-entry-date" dateTime="2026-05-05">
+                May 5, 2026
+              </time>
+            </header>
+            <div className="leroy-update-letter">
             <p className="leroy-update-salutation">Dear friends and family,</p>
           <p>
             We wanted to share an update about our dad, LeRoy Harvey III. He was
@@ -717,8 +778,9 @@ function FamilyUpdatePanel() {
             <br />
             Molly and Solomon &lt;3
           </p>
+            </div>
+          </article>
         </div>
-      </div>
       </div>
     </section>
   );
