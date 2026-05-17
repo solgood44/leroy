@@ -995,7 +995,8 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  max-width: 40rem;
+  width: 100%;
+  max-width: none;
 }
 
 .leroy-form-feed-title {
@@ -1199,7 +1200,6 @@ body {
   font-size: 0.8rem;
   line-height: 1.4;
   color: var(--muted);
-  max-width: 28rem;
 }
 
 .leroy-form-feed-photos-only-note {
@@ -1207,11 +1207,10 @@ body {
   font-size: 0.88rem;
   line-height: 1.5;
   color: var(--muted);
-  max-width: 36rem;
 }
 
 .leroy-form-feed-body {
-  max-width: 38rem;
+  max-width: none;
 }
 
 .leroy-form-feed-para {
