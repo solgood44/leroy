@@ -120,8 +120,13 @@ body {
 }
 
 .leroy-site-header-nav {
-  flex: 1 1 12rem;
   min-width: 0;
+}
+
+@media (min-width: 641px) {
+  .leroy-site-header-nav {
+    flex: 1 1 auto;
+  }
 }
 
 .leroy-site-header-nav-list {
@@ -158,16 +163,76 @@ body {
   outline: none;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .leroy-site-header-inner {
     flex-direction: column;
-    align-items: stretch;
-    padding-top: 0.6rem;
-    padding-bottom: 0.65rem;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: 0.45rem 0.75rem 0.5rem;
+  }
+
+  .leroy-site-header-brand {
+    align-self: center;
+    font-size: 0.95rem;
+  }
+
+  .leroy-site-header-nav {
+    flex: none;
+    width: 100%;
+    min-height: 0;
   }
 
   .leroy-site-header-nav-list {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.05rem;
+  }
+
+  .leroy-site-header-nav-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .leroy-site-header-nav a {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 2rem;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .leroy-jump-target {
+    scroll-margin-top: 5.25rem;
+  }
+
+  .leroy-page {
+    padding-top: 0.65rem;
+  }
+
+  .leroy-hero h1,
+  .leroy-hero .tag {
+    display: none;
+  }
+
+  .leroy-hero {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .leroy-hero-carousel-wrap {
+    margin-top: 0;
+    margin-bottom: 1rem;
   }
 }
 
@@ -1507,7 +1572,9 @@ body {
 
 @media (max-width: 639px) {
   .leroy-page {
-    padding: 1.75rem 1rem 3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 3rem;
   }
 
   .leroy-form-feed {
