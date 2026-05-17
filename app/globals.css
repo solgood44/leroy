@@ -82,47 +82,93 @@ body {
   margin: 0 0 1rem;
 }
 
-.leroy-jump-nav {
+.leroy-site-header {
   position: sticky;
   top: 0;
-  z-index: 40;
-  margin: -0.25rem 0 1.75rem;
-  padding: 0.6rem 0;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(10px);
+  z-index: 50;
+  width: 100%;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 80%, transparent);
 }
 
-.leroy-jump-nav-list {
+.leroy-site-header-inner {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem 0.5rem;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+}
+
+.leroy-site-header-brand {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.leroy-site-header-brand:hover,
+.leroy-site-header-brand:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.leroy-site-header-nav {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.leroy-site-header-nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem 0.45rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.leroy-jump-nav a {
+.leroy-site-header-nav a {
   display: inline-block;
-  padding: 0.35rem 0.7rem;
+  padding: 0.32rem 0.62rem;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: var(--text);
   text-decoration: none;
-  background: var(--surface);
+  background: var(--bg);
   border: 1px solid var(--border);
   transition:
     background 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
-.leroy-jump-nav a:hover,
-.leroy-jump-nav a:focus-visible {
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+.leroy-site-header-nav a:hover,
+.leroy-site-header-nav a:focus-visible {
+  color: var(--accent);
+  background: var(--accent-soft);
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
   outline: none;
+}
+
+@media (max-width: 640px) {
+  .leroy-site-header-inner {
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 0.6rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .leroy-site-header-nav-list {
+    justify-content: center;
+  }
 }
 
 .leroy-hero .lede {
@@ -1028,7 +1074,7 @@ body {
 }
 
 .leroy-jump-target {
-  scroll-margin-top: 4.25rem;
+  scroll-margin-top: 5.5rem;
 }
 
 .leroy-form-feed {

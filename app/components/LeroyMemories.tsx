@@ -44,21 +44,29 @@ const PAGE_JUMP_LINKS = [
   { href: "#posts", label: "Posts" },
 ] as const;
 
-function PageJumpNav({ showPosts }: { showPosts: boolean }) {
-  const links = showPosts
-    ? PAGE_JUMP_LINKS
-    : PAGE_JUMP_LINKS.filter((l) => l.href !== "#posts");
+function SiteHeader() {
+  const links = PAGE_JUMP_LINKS.filter((l) => l.href !== "#top");
 
   return (
-    <nav className="leroy-jump-nav" aria-label="Jump to a section on this page">
-      <ul className="leroy-jump-nav-list">
-        {links.map(({ href, label }) => (
-          <li key={href}>
-            <a href={href}>{label}</a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <header className="leroy-site-header">
+      <div className="leroy-site-header-inner">
+        <a href="#top" className="leroy-site-header-brand">
+          LeRoy Harvey III
+        </a>
+        <nav
+          className="leroy-site-header-nav"
+          aria-label="Sections on this page"
+        >
+          <ul className="leroy-site-header-nav-list">
+            {links.map(({ href, label }) => (
+              <li key={href}>
+                <a href={href}>{label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
   );
 }
 
@@ -1086,7 +1094,9 @@ export function LeroyMemories({
   }, [heroCarouselUrls]);
 
   return (
-    <div className="leroy-page">
+    <>
+      <SiteHeader />
+      <div className="leroy-page">
       <header id="top" className="leroy-hero leroy-jump-target">
         <div className="leroy-hero-carousel-wrap">
           <PhotoCarousel
@@ -1100,8 +1110,6 @@ export function LeroyMemories({
         <h1>LeRoy Harvey III</h1>
         <p className="tag">A place for memories, photos, and words of love</p>
       </header>
-
-      <PageJumpNav showPosts={Boolean(data && mergedFeed.length > 0)} />
 
       <FeaturedMusic />
 
@@ -1173,6 +1181,7 @@ export function LeroyMemories({
       {lightbox ? (
         <Lightbox item={lightbox} onClose={closeLb} />
       ) : null}
-    </div>
+      </div>
+    </>
   );
 }
