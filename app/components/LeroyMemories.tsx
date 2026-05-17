@@ -35,6 +35,33 @@ const LINKS = {
 
 const FEATURED_YOUTUBE_ID = "qTXN_A8bUyI";
 
+const PAGE_JUMP_LINKS = [
+  { href: "#top", label: "Home" },
+  { href: "#music", label: "Music" },
+  { href: "#reach-out", label: "Reach out" },
+  { href: "#support", label: "Donate" },
+  { href: "#updates", label: "Updates" },
+  { href: "#posts", label: "Posts" },
+] as const;
+
+function PageJumpNav({ showPosts }: { showPosts: boolean }) {
+  const links = showPosts
+    ? PAGE_JUMP_LINKS
+    : PAGE_JUMP_LINKS.filter((l) => l.href !== "#posts");
+
+  return (
+    <nav className="leroy-jump-nav" aria-label="Jump to a section on this page">
+      <ul className="leroy-jump-nav-list">
+        {links.map(({ href, label }) => (
+          <li key={href}>
+            <a href={href}>{label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 function Lightbox({
   item,
   onClose,
@@ -566,7 +593,7 @@ function FormMessagesFeed({
   return (
     <section
       id="posts"
-      className="leroy-form-feed"
+      className="leroy-form-feed leroy-jump-target"
       aria-label="Posts from friends and family"
     >
       <h2 className="leroy-form-feed-title">Posts</h2>
@@ -607,7 +634,11 @@ function FormMessagesFeed({
 
 function FeaturedMusic() {
   return (
-    <section className="leroy-featured-music" aria-label="Featured music">
+    <section
+      id="music"
+      className="leroy-featured-music leroy-jump-target"
+      aria-label="Featured music"
+    >
       <h2 className="leroy-featured-music-title">Music from LeRoy</h2>
       <div className="leroy-featured-music-video">
         <iframe
@@ -639,7 +670,8 @@ function FamilyUpdatePanel() {
 
   return (
     <section
-      className="leroy-update"
+      id="updates"
+      className="leroy-update leroy-jump-target"
       aria-label="Family updates from Molly and Solomon"
     >
       <div className="leroy-update-header">
@@ -821,7 +853,11 @@ function FamilyUpdatePanel() {
 
 function FamilySupportNotice() {
   return (
-    <section className="leroy-support" aria-label="How to help the family">
+    <section
+      id="support"
+      className="leroy-support leroy-jump-target"
+      aria-label="How to help the family"
+    >
       <p className="leroy-support-intro">
         As we support our dad through end-of-life care, many friends and family
         have asked how they can help. Donations will help with caregiving,
@@ -876,7 +912,11 @@ function FamilySupportNotice() {
 
 function QuickActions() {
   return (
-    <nav className="leroy-actions" aria-label="Ways to connect">
+    <nav
+      id="reach-out"
+      className="leroy-actions leroy-jump-target"
+      aria-label="Ways to connect"
+    >
       <h2 className="leroy-actions-heading">Ways to reach out</h2>
       <p className="leroy-actions-sub">
         Pick what works for you—each link opens in a new tab.
@@ -1047,7 +1087,7 @@ export function LeroyMemories({
 
   return (
     <div className="leroy-page">
-      <header className="leroy-hero">
+      <header id="top" className="leroy-hero leroy-jump-target">
         <div className="leroy-hero-carousel-wrap">
           <PhotoCarousel
             media={heroMedia}
@@ -1060,6 +1100,8 @@ export function LeroyMemories({
         <h1>LeRoy Harvey III</h1>
         <p className="tag">A place for memories, photos, and words of love</p>
       </header>
+
+      <PageJumpNav showPosts={Boolean(data && mergedFeed.length > 0)} />
 
       <FeaturedMusic />
 
