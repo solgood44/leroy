@@ -89,6 +89,12 @@ function substringScore(stem: string, name: string): number {
   if (hits.length >= 1 && parts.length === 1) return 58;
   if (parts.length >= 2 && hits.length === 1) {
     const [first] = parts;
+    const fLast = parts[parts.length - 1]!;
+    const stemParts = stem.split(" ").filter((x) => x.length > 1);
+    if (stemParts.length >= 2) {
+      const hLast = stemParts[stemParts.length - 1]!.toLowerCase();
+      if (hLast !== fLast.toLowerCase()) return 0;
+    }
     if (first && stem.startsWith(first)) return 56;
   }
   return 0;
