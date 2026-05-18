@@ -34,6 +34,25 @@ const LINKS = {
 } as const;
 
 const FEATURED_YOUTUBE_ID = "qTXN_A8bUyI";
+const SITE_SHARE_URL = "https://www.weloveleroy.com";
+
+type LightboxSlide = { url: string; label: string };
+
+type OpenLightbox = (
+  url: string,
+  label: string,
+  gallery?: LightboxSlide[],
+) => void;
+
+function memoryFilesToSlides(
+  media: MemoryFile[],
+  labelPrefix: string,
+): LightboxSlide[] {
+  return media.map((f) => ({
+    url: f.url,
+    label: `${labelPrefix} — ${f.fileName}`,
+  }));
+}
 
 const PAGE_JUMP_LINKS = [
   { href: "#top", label: "Home" },
@@ -70,26 +89,109 @@ function SiteHeader() {
   );
 }
 
+async function copySiteLink(): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(SITE_SHARE_URL);
+    return true;
+  } catch {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = SITE_SHARE_URL;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
+
+function ShareNote() {
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  );
+
+  const onCopy = useCallback(async () => {
+    const ok = await copySiteLink();
+    setCopyState(ok ? "copied" : "failed");
+    window.setTimeout(() => setCopyState("idle"), ok ? 2200 : 3500);
+  }, []);
+
+  return (
+    <div className="leroy-share-note">
+      <p className="leroy-share-note-text">
+        We&apos;re doing our best to keep this site updated—please share this
+        page with anyone, and any community, you think LeRoy knows.
+      </p>
+      <div className="leroy-share-note-actions">
+        <a href={SITE_SHARE_URL} className="leroy-share-note-link">
+          {SITE_SHARE_URL.replace(/^https:\/\//, "")}
+        </a>
+        <button
+          type="button"
+          className="leroy-share-copy"
+          onClick={() => void onCopy()}
+          aria-live="polite"
+        >
+          {copyState === "copied"
+            ? "Copied!"
+            : copyState === "failed"
+              ? "Copy failed — tap link"
+              : "Copy link"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Lightbox({
-  item,
+  items,
+  index,
   onClose,
+  onIndexChange,
 }: {
-  item: { url: string; label: string };
+  items: LightboxSlide[];
+  index: number;
   onClose: () => void;
+  onIndexChange: (index: number) => void;
 }) {
   const [rotationDeg, setRotationDeg] = useState(0);
+  const item = items[index];
+  const canPrev = index > 0;
+  const canNext = index < items.length - 1;
+  const showNav = items.length > 1;
+
+  const goPrev = useCallback(() => {
+    if (canPrev) onIndexChange(index - 1);
+  }, [canPrev, index, onIndexChange]);
+
+  const goNext = useCallback(() => {
+    if (canNext) onIndexChange(index + 1);
+  }, [canNext, index, onIndexChange]);
 
   useEffect(() => {
     setRotationDeg(0);
-  }, [item.url]);
+  }, [item?.url]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "[" || e.key === "ArrowLeft") {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goNext();
+      }
+      if (e.key === "[") {
         setRotationDeg((d) => (d - 90 + 360) % 360);
       }
-      if (e.key === "]" || e.key === "ArrowRight") {
+      if (e.key === "]") {
         setRotationDeg((d) => (d + 90) % 360);
       }
     };
@@ -100,7 +202,11 @@ function Lightbox({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [onClose]);
+  }, [onClose, goPrev, goNext]);
+
+  if (!item) return null;
+
+  const sideways = rotationDeg % 180 !== 0;
 
   return (
     <div
@@ -118,6 +224,39 @@ function Lightbox({
       >
         ×
       </button>
+      {showNav ? (
+        <p className="leroy-lightbox-counter" aria-live="polite">
+          {index + 1} / {items.length}
+        </p>
+      ) : null}
+      {showNav ? (
+        <>
+          <button
+            type="button"
+            className="leroy-lightbox-nav leroy-lightbox-nav--prev"
+            onClick={(e) => {
+              e.stopPropagation();
+              goPrev();
+            }}
+            disabled={!canPrev}
+            aria-label="Previous photo"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className="leroy-lightbox-nav leroy-lightbox-nav--next"
+            onClick={(e) => {
+              e.stopPropagation();
+              goNext();
+            }}
+            disabled={!canNext}
+            aria-label="Next photo"
+          >
+            ›
+          </button>
+        </>
+      ) : null}
       <div
         className="leroy-lightbox-toolbar"
         onClick={(e) => e.stopPropagation()}
@@ -151,10 +290,8 @@ function Lightbox({
           decoding="async"
           style={{
             transform: `rotate(${rotationDeg}deg)`,
-            maxWidth:
-              rotationDeg % 180 !== 0 ? "min(95vh, 100%)" : undefined,
-            maxHeight:
-              rotationDeg % 180 !== 0 ? "min(95vw, 100%)" : undefined,
+            maxWidth: sideways ? "min(95vh, 100%)" : undefined,
+            maxHeight: sideways ? "min(95vw, 100%)" : undefined,
           }}
         />
       </div>
@@ -172,13 +309,17 @@ function PhotoCarousel({
   media: MemoryFile[];
   whenByFileId: Map<string, string>;
   albumLabel: string;
-  onOpen: (url: string, label: string) => void;
+  onOpen: OpenLightbox;
   /** LCP: set on the hero carousel only */
   firstSlidePriority?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const n = media.length;
+  const lightboxSlides = useMemo(
+    () => memoryFilesToSlides(media, albumLabel),
+    [media, albumLabel],
+  );
 
   const syncIndex = useCallback(() => {
     const el = trackRef.current;
@@ -256,7 +397,11 @@ function PhotoCarousel({
                   type="button"
                   className="leroy-carousel-photo-btn"
                   onClick={() =>
-                    onOpen(file.url, `${albumLabel} — ${file.fileName}`)
+                    onOpen(
+                      file.url,
+                      `${albumLabel} — ${file.fileName}`,
+                      lightboxSlides,
+                    )
                   }
                   aria-label={when ? `Open photo from ${when}` : "Open photo"}
                 >
@@ -307,17 +452,21 @@ function PhotoCarousel({
 
 function UnmatchedCard({
   file,
+  gallery,
   onOpen,
 }: {
   file: MemoryFile;
-  onOpen: (url: string, label: string) => void;
+  gallery: LightboxSlide[];
+  onOpen: OpenLightbox;
 }) {
   return (
     <article className="leroy-card">
       <button
         type="button"
         className="leroy-card-media-btn"
-        onClick={() => onOpen(file.url, `Unmatched — ${file.fileName}`)}
+        onClick={() =>
+          onOpen(file.url, `Unmatched — ${file.fileName}`, gallery)
+        }
         aria-label={`Open ${file.fileName}`}
       >
         <Image
@@ -394,7 +543,7 @@ function FormFeedItem({
 }: {
   m: ChronologicalFormMessage;
   album: PersonAlbum | undefined;
-  onOpenLightbox: (url: string, label: string) => void;
+  onOpenLightbox: OpenLightbox;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [pendingScroll, setPendingScroll] = useState<
@@ -538,7 +687,7 @@ function FormFeedPhotoOnlyItem({
 }: {
   album: PersonAlbum;
   whenLabel: string;
-  onOpenLightbox: (url: string, label: string) => void;
+  onOpenLightbox: OpenLightbox;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [pendingScroll, setPendingScroll] = useState(false);
@@ -640,7 +789,7 @@ function FormMessagesFeed({
 }: {
   entries: LeroyFeedEntry[];
   albumsByPersonKey: Map<string, PersonAlbum>;
-  onOpenLightbox: (url: string, label: string) => void;
+  onOpenLightbox: OpenLightbox;
 }) {
   if (entries.length === 0) return null;
   return (
@@ -1054,8 +1203,8 @@ export function LeroyMemories({
   const [data, setData] = useState<MemoriesPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{
-    url: string;
-    label: string;
+    items: LightboxSlide[];
+    index: number;
   } | null>(null);
 
   useEffect(() => {
@@ -1086,6 +1235,53 @@ export function LeroyMemories({
   }, []);
 
   const closeLb = useCallback(() => setLightbox(null), []);
+
+  const lightboxGallery = useMemo((): LightboxSlide[] => {
+    const seen = new Set<string>();
+    const slides: LightboxSlide[] = [];
+    const add = (url: string, label: string) => {
+      if (seen.has(url)) return;
+      seen.add(url);
+      slides.push({ url, label });
+    };
+    for (const url of heroCarouselUrls) {
+      add(url, "LeRoy Harvey III");
+    }
+    if (!heroCarouselUrls.length) {
+      add("/leroy-hero.jpeg", "LeRoy Harvey III");
+    }
+    for (const album of data?.albums ?? []) {
+      for (const file of album.media) {
+        add(file.url, `${album.displayName} — ${file.fileName}`);
+      }
+    }
+    for (const file of data?.unmatchedMedia ?? []) {
+      add(file.url, file.fileName);
+    }
+    return slides;
+  }, [data, heroCarouselUrls]);
+
+  const openLightbox = useCallback<OpenLightbox>(
+    (url, label, gallery) => {
+      const items =
+        gallery && gallery.length > 0
+          ? gallery
+          : lightboxGallery.length > 0
+            ? lightboxGallery
+            : [{ url, label }];
+      let index = items.findIndex((s) => s.url === url);
+      if (index < 0) index = 0;
+      setLightbox({ items, index });
+    },
+    [lightboxGallery],
+  );
+
+  const unmatchedSlides = useMemo((): LightboxSlide[] => {
+    return (data?.unmatchedMedia ?? []).map((f) => ({
+      url: f.url,
+      label: `Unmatched — ${f.fileName}`,
+    }));
+  }, [data?.unmatchedMedia]);
 
   const albumsByPersonKey = useMemo(() => {
     const m = new Map<string, PersonAlbum>();
@@ -1142,13 +1338,14 @@ export function LeroyMemories({
     <>
       <SiteHeader />
       <div className="leroy-page">
+      <ShareNote />
       <header id="top" className="leroy-hero leroy-jump-target">
         <div className="leroy-hero-carousel-wrap">
           <PhotoCarousel
             media={heroMedia}
             whenByFileId={new Map()}
             albumLabel="LeRoy Harvey III"
-            onOpen={(url, label) => setLightbox({ url, label })}
+            onOpen={openLightbox}
             firstSlidePriority
           />
         </div>
@@ -1178,7 +1375,7 @@ export function LeroyMemories({
         <FormMessagesFeed
           entries={mergedFeed}
           albumsByPersonKey={albumsByPersonKey}
-          onOpenLightbox={(url, label) => setLightbox({ url, label })}
+          onOpenLightbox={openLightbox}
         />
       ) : null}
 
@@ -1205,7 +1402,8 @@ export function LeroyMemories({
                   <UnmatchedCard
                     key={file.id}
                     file={file}
-                    onOpen={(url, label) => setLightbox({ url, label })}
+                    gallery={unmatchedSlides}
+                    onOpen={openLightbox}
                   />
                 ))}
               </div>
@@ -1224,7 +1422,14 @@ export function LeroyMemories({
       ) : null}
 
       {lightbox ? (
-        <Lightbox item={lightbox} onClose={closeLb} />
+        <Lightbox
+          items={lightbox.items}
+          index={lightbox.index}
+          onClose={closeLb}
+          onIndexChange={(index) =>
+            setLightbox((lb) => (lb ? { ...lb, index } : lb))
+          }
+        />
       ) : null}
       </div>
     </>

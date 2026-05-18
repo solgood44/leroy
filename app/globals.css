@@ -1498,6 +1498,67 @@ body {
   margin: 0 0 0.35rem;
 }
 
+.leroy-share-note {
+  margin: 0 0 1.35rem;
+  padding: 0.9rem 1.15rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.leroy-share-note-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.leroy-share-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.65rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.leroy-share-note-link {
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.leroy-share-note-link:hover,
+.leroy-share-note-link:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+.leroy-share-copy {
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.leroy-share-copy:hover,
+.leroy-share-copy:focus-visible {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  outline: none;
+}
+
 /* ——— States ——— */
 .leroy-banner {
   border-radius: 8px;
@@ -1575,6 +1636,59 @@ body {
 .leroy-lightbox-tool:focus-visible {
   background: rgba(255, 255, 255, 0.22);
   outline: none;
+}
+
+.leroy-lightbox-counter {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  z-index: 1001;
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.leroy-lightbox-nav {
+  position: fixed;
+  top: 50%;
+  z-index: 1001;
+  width: 2.85rem;
+  height: 2.85rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 252, 248, 0.94);
+  color: #1c1a17;
+  font-size: 1.65rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+  transform: translateY(-50%);
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.leroy-lightbox-nav:hover:not(:disabled),
+.leroy-lightbox-nav:focus-visible:not(:disabled) {
+  background: #fff;
+  outline: none;
+}
+
+.leroy-lightbox-nav:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.leroy-lightbox-nav--prev {
+  left: max(0.5rem, env(safe-area-inset-left));
+}
+
+.leroy-lightbox-nav--next {
+  right: max(0.5rem, env(safe-area-inset-right));
 }
 
 .leroy-lightbox-close {
