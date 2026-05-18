@@ -1528,10 +1528,53 @@ body {
   z-index: 1000;
   background: rgba(0, 0, 0, 0.9);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
+  gap: 0.75rem;
+  padding: 3.5rem 1rem 5rem;
   cursor: zoom-out;
+}
+
+.leroy-lightbox-stage {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+  cursor: default;
+}
+
+.leroy-lightbox-toolbar {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  z-index: 1001;
+  display: flex;
+  gap: 0.5rem;
+  transform: translateX(-50%);
+  cursor: default;
+}
+
+.leroy-lightbox-tool {
+  padding: 0.5rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.leroy-lightbox-tool:hover,
+.leroy-lightbox-tool:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  outline: none;
 }
 
 .leroy-lightbox-close {
@@ -1550,15 +1593,17 @@ body {
   z-index: 1001;
 }
 
+.leroy-lightbox-photo,
 .leroy-lightbox img,
 .leroy-lightbox video {
   max-width: 100%;
-  max-height: calc(100vh - 4rem);
+  max-height: calc(100vh - 8rem);
   width: auto;
   height: auto;
   object-fit: contain;
   cursor: default;
   border-radius: 4px;
+  transition: transform 0.2s ease;
 }
 
 .leroy-footer {

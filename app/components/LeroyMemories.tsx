@@ -77,9 +77,21 @@ function Lightbox({
   item: { url: string; label: string };
   onClose: () => void;
 }) {
+  const [rotationDeg, setRotationDeg] = useState(0);
+
+  useEffect(() => {
+    setRotationDeg(0);
+  }, [item.url]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "[" || e.key === "ArrowLeft") {
+        setRotationDeg((d) => (d - 90 + 360) % 360);
+      }
+      if (e.key === "]" || e.key === "ArrowRight") {
+        setRotationDeg((d) => (d + 90) % 360);
+      }
     };
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
@@ -106,13 +118,46 @@ function Lightbox({
       >
         ×
       </button>
-      {/* eslint-disable-next-line @next/next/no-img-element -- variable aspect ratio */}
-      <img
-        src={item.url}
-        alt={item.label}
-        decoding="async"
+      <div
+        className="leroy-lightbox-toolbar"
         onClick={(e) => e.stopPropagation()}
-      />
+      >
+        <button
+          type="button"
+          className="leroy-lightbox-tool"
+          onClick={() => setRotationDeg((d) => (d - 90 + 360) % 360)}
+          aria-label="Rotate left"
+        >
+          ↺ Left
+        </button>
+        <button
+          type="button"
+          className="leroy-lightbox-tool"
+          onClick={() => setRotationDeg((d) => (d + 90) % 360)}
+          aria-label="Rotate right"
+        >
+          Right ↻
+        </button>
+      </div>
+      <div
+        className="leroy-lightbox-stage"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- variable aspect ratio + client rotate */}
+        <img
+          className="leroy-lightbox-photo"
+          src={item.url}
+          alt={item.label}
+          decoding="async"
+          style={{
+            transform: `rotate(${rotationDeg}deg)`,
+            maxWidth:
+              rotationDeg % 180 !== 0 ? "min(95vh, 100%)" : undefined,
+            maxHeight:
+              rotationDeg % 180 !== 0 ? "min(95vw, 100%)" : undefined,
+          }}
+        />
+      </div>
     </div>
   );
 }
