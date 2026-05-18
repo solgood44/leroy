@@ -100,7 +100,6 @@ async function optimizeOne(absPath: string, agg: Agg): Promise<void> {
     outBuf = await pipeline
       .flatten({ background: { r: 255, g: 255, b: 255 } })
       .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
-      .withMetadata()
       .toBuffer();
     outExt = jpegExtFor(ext);
   }
@@ -113,8 +112,9 @@ async function optimizeOne(absPath: string, agg: Agg): Promise<void> {
   const resized = maxDim > MAX_LONG_EDGE;
   const smaller = outBuf.length < beforeSize;
   const extensionChange = outExt.toLowerCase() !== extLower;
+  const needsOrient = (meta.orientation ?? 1) !== 1;
 
-  if (!resized && !smaller && !extensionChange) {
+  if (!resized && !smaller && !extensionChange && !needsOrient) {
     agg.skipped += 1;
     agg.bytesAfter += beforeSize;
     return;
