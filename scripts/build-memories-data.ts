@@ -21,7 +21,7 @@ const heroManifestPath = join(
   "heroCarouselManifest.generated.ts",
 );
 
-const FIRST_HERO_SLIDE = "IMG_0597.jpeg";
+const FIRST_HERO_SLIDE = "leroy-memorial-main.jpeg";
 const ROOT_HERO_URL = "/leroy-hero.jpeg";
 
 async function listHeroCarouselFiles(): Promise<string[]> {

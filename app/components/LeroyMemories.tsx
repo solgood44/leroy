@@ -34,7 +34,6 @@ const LINKS = {
 } as const;
 
 const FEATURED_YOUTUBE_ID = "qTXN_A8bUyI";
-const SITE_SHARE_URL = "https://www.weloveleroy.com";
 
 type LightboxSlide = { url: string; label: string };
 
@@ -89,62 +88,38 @@ function SiteHeader() {
   );
 }
 
-async function copySiteLink(): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(SITE_SHARE_URL);
-    return true;
-  } catch {
-    try {
-      const ta = document.createElement("textarea");
-      ta.value = SITE_SHARE_URL;
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      document.body.appendChild(ta);
-      ta.select();
-      const ok = document.execCommand("copy");
-      document.body.removeChild(ta);
-      return ok;
-    } catch {
-      return false;
-    }
-  }
-}
-
-function ShareNote() {
-  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
-    "idle",
-  );
-
-  const onCopy = useCallback(async () => {
-    const ok = await copySiteLink();
-    setCopyState(ok ? "copied" : "failed");
-    window.setTimeout(() => setCopyState("idle"), ok ? 2200 : 3500);
-  }, []);
-
+function MemorialAnnouncement() {
   return (
-    <div className="leroy-share-note">
-      <p className="leroy-share-note-text">
-        We&apos;re doing our best to keep this site updated—please share this
-        page with anyone, and any community, you think LeRoy knows.
-      </p>
-      <div className="leroy-share-note-actions">
-        <a href={SITE_SHARE_URL} className="leroy-share-note-link">
-          {SITE_SHARE_URL.replace(/^https:\/\//, "")}
-        </a>
-        <button
-          type="button"
-          className="leroy-share-copy"
-          onClick={() => void onCopy()}
-          aria-live="polite"
-        >
-          {copyState === "copied"
-            ? "Copied!"
-            : copyState === "failed"
-              ? "Copy failed — tap link"
-              : "Copy link"}
-        </button>
+    <section
+      className="leroy-memorial"
+      aria-label="In loving memory of LeRoy Harvey III"
+    >
+      <span className="leroy-memorial-butterfly" aria-hidden>
+        🦋
+      </span>
+      <p className="leroy-memorial-eyebrow">In loving memory</p>
+      <h2 className="leroy-memorial-name">LeRoy Harvey III</h2>
+      <p className="leroy-memorial-dates">1959 – 2026</p>
+      <div className="leroy-memorial-letter">
+        <p>
+          LeRoy Harvey III left his body peacefully on May 19th at 7:30PM. He
+          was at home, surrounded by so much love. His quiet and humble strength
+          was present throughout his last weeks, and days, and we are deeply
+          inspired and moved by his grace during this process.
+        </p>
+        <p>
+          Thank you from the bottom of our hearts for your continued support
+          during this time. The outpouring of love for our dad has given us
+          strength as we&apos;ve navigated this. We will update with details on a
+          memorial service when we can.
+        </p>
+        <p className="leroy-memorial-signoff">
+          With love,
+          <br />
+          Molly &amp; Solomon
+        </p>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -305,6 +280,7 @@ function PhotoCarousel({
   albumLabel,
   onOpen,
   firstSlidePriority = false,
+  fitContain = false,
 }: {
   media: MemoryFile[];
   whenByFileId: Map<string, string>;
@@ -312,6 +288,8 @@ function PhotoCarousel({
   onOpen: OpenLightbox;
   /** LCP: set on the hero carousel only */
   firstSlidePriority?: boolean;
+  /** Show full image without cropping (hero carousel) */
+  fitContain?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -357,7 +335,11 @@ function PhotoCarousel({
 
   return (
     <div
-      className="leroy-photo-carousel"
+      className={
+        fitContain
+          ? "leroy-photo-carousel leroy-photo-carousel--contain"
+          : "leroy-photo-carousel"
+      }
       role="region"
       aria-roledescription="carousel"
       aria-label={`Photos from ${albumLabel}`}
@@ -395,7 +377,11 @@ function PhotoCarousel({
                 ) : null}
                 <button
                   type="button"
-                  className="leroy-carousel-photo-btn"
+                  className={
+                    fitContain
+                      ? "leroy-carousel-photo-btn leroy-carousel-photo-btn--contain"
+                      : "leroy-carousel-photo-btn"
+                  }
                   onClick={() =>
                     onOpen(
                       file.url,
@@ -405,17 +391,30 @@ function PhotoCarousel({
                   }
                   aria-label={when ? `Open photo from ${when}` : "Open photo"}
                 >
-                  <div className="leroy-carousel-photo-frame">
+                  {fitContain ? (
                     <Image
                       src={file.url}
                       alt=""
-                      fill
-                      className="leroy-carousel-photo-img"
+                      width={820}
+                      height={1100}
+                      className="leroy-carousel-photo-img leroy-carousel-photo-img--contain"
                       sizes="(max-width: 640px) 100vw, 520px"
                       quality={75}
                       priority={firstSlidePriority && slideIndex === 0}
                     />
-                  </div>
+                  ) : (
+                    <div className="leroy-carousel-photo-frame">
+                      <Image
+                        src={file.url}
+                        alt=""
+                        fill
+                        className="leroy-carousel-photo-img"
+                        sizes="(max-width: 640px) 100vw, 520px"
+                        quality={75}
+                        priority={firstSlidePriority && slideIndex === 0}
+                      />
+                    </div>
+                  )}
                 </button>
               </div>
             );
@@ -883,42 +882,22 @@ function FamilyUpdatePanel() {
 
       <article className="leroy-update-entry leroy-update-entry--current">
         <header className="leroy-update-entry-head">
-          <h3 className="leroy-update-entry-title">Update 5/16</h3>
-          <time className="leroy-update-entry-date" dateTime="2026-05-16">
-            May 16, 2026
+          <h3 className="leroy-update-entry-title">May 19, 2026</h3>
+          <time className="leroy-update-entry-date" dateTime="2026-05-19">
+            May 19, 2026
           </time>
         </header>
         <div className="leroy-update-letter">
           <p>
-            We wanted to share another update on social media as well, as many
-            people have been reaching out and asking how he&apos;s doing.
-            Currently, he is still receiving hospice care at home after we
-            found out he had a return of brain cancer four weeks ago. He has not
-            eaten for over a week and has been mostly in bed. With that said,
-            his spirit is still shining bright, he still knows who we are, and
-            he is responsive to questions—but very low energy and mostly
-            resting peacefully with his eyes closed. He is also singing along
-            to lyrics when people play him music, and is often smiling and as
-            sweet as ever.
+            Thank you for the hundreds of messages, meals, donations, and
+            prayers over these past weeks. You can still read notes and see
+            photos in the <a href="#posts">Posts</a> section below—they mean
+            so much to us.
           </p>
           <p>
-            He is not answering email, calls, or texts, but we are checking his
-            phone to convey messages as needed.
-          </p>
-          <p>
-            Throughout the last few weeks we have received hundreds of messages,
-            donations, and dinners from all of you, and we have tried to ensure
-            he receives them. The hospice nurse informed us that hearing is one
-            of the last senses to go during the end of life, so please continue
-            to send messages as you feel inspired. You can read notes and see
-            photos in the{" "}
-            <a href="#posts">Posts</a> section below. This has all happened so
-            quickly, and we are doing our best to process this and respond to
-            everyone—we know there are so many people who love him.
-          </p>
-          <p>
-            One way you can help right now is to share this website with anyone
-            you know who loves him.
+            We plan to cremate him and will take some time to process. We will
+            share details about a celebration of his life in the coming weeks
+            and months.
           </p>
           <p className="leroy-update-signoff">
             With love,
@@ -937,7 +916,7 @@ function FamilyUpdatePanel() {
           aria-controls="family-update-earlier"
         >
           <span className="leroy-update-archive-label">
-            Earlier updates · May 12 and May 5, 2026
+            Earlier updates · May 16, May 12, and May 5, 2026
           </span>
           <span className="leroy-update-chevron" aria-hidden>
             {earlierOpen ? "−" : "+"}
@@ -950,7 +929,49 @@ function FamilyUpdatePanel() {
         >
           <article className="leroy-update-entry leroy-update-entry--archived">
             <header className="leroy-update-entry-head">
-              <h3 className="leroy-update-entry-title">Update 5/12</h3>
+              <h3 className="leroy-update-entry-title">May 16, 2026</h3>
+              <time className="leroy-update-entry-date" dateTime="2026-05-16">
+                May 16, 2026
+              </time>
+            </header>
+            <div className="leroy-update-letter">
+              <p>
+                We wanted to share another update on social media as well, as
+                many people have been reaching out and asking how he&apos;s
+                doing. Currently, he is still receiving hospice care at home
+                after we found out he had a return of brain cancer four weeks
+                ago. He has not eaten for over a week and has been mostly in
+                bed. With that said, his spirit is still shining bright, he
+                still knows who we are, and he is responsive to
+                questions—but very low energy and mostly resting peacefully
+                with his eyes closed. He is also singing along to lyrics when
+                people play him music, and is often smiling and as sweet as
+                ever.
+              </p>
+              <p>
+                He is not answering email, calls, or texts, but we are checking
+                his phone to convey messages as needed.
+              </p>
+              <p>
+                Throughout the last few weeks we have received hundreds of
+                messages, donations, and dinners from all of you, and we have
+                tried to ensure he receives them. The hospice nurse informed us
+                that hearing is one of the last senses to go during the end of
+                life, so please continue to send messages as you feel inspired.
+                You can read notes and see photos in the{" "}
+                <a href="#posts">Posts</a> section below.
+              </p>
+              <p className="leroy-update-signoff">
+                With love,
+                <br />
+                Molly and Solomon &lt;3
+              </p>
+            </div>
+          </article>
+
+          <article className="leroy-update-entry leroy-update-entry--archived">
+            <header className="leroy-update-entry-head">
+              <h3 className="leroy-update-entry-title">May 12, 2026</h3>
               <time
                 className="leroy-update-entry-date"
                 dateTime="2026-05-12"
@@ -1338,7 +1359,7 @@ export function LeroyMemories({
     <>
       <SiteHeader />
       <div className="leroy-page">
-      <ShareNote />
+      <MemorialAnnouncement />
       <header id="top" className="leroy-hero leroy-jump-target">
         <div className="leroy-hero-carousel-wrap">
           <PhotoCarousel
@@ -1347,6 +1368,7 @@ export function LeroyMemories({
             albumLabel="LeRoy Harvey III"
             onOpen={openLightbox}
             firstSlidePriority
+            fitContain
           />
         </div>
         <h1>LeRoy Harvey III</h1>
