@@ -535,6 +535,17 @@ function formatFeedWhen(sortKeyMs: number): string {
   });
 }
 
+/** Scroll so the post header (name + date) sits below the sticky site nav. */
+function scrollPostHeaderIntoView(el: HTMLElement | null) {
+  if (!el) return;
+  const header = document.querySelector(".leroy-site-header");
+  const gap = 12;
+  const offset =
+    (header instanceof HTMLElement ? header.offsetHeight : 0) + gap;
+  const top = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
 function FormFeedItem({
   m,
   album,
@@ -545,34 +556,23 @@ function FormFeedItem({
   onOpenLightbox: OpenLightbox;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [pendingScroll, setPendingScroll] = useState<
-    "message" | "photos" | null
-  >(null);
-  const messageRef = useRef<HTMLDivElement>(null);
-  const photosRef = useRef<HTMLDivElement>(null);
+  const [pendingScroll, setPendingScroll] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
   const dateTime =
     m.sortKeyMs > 0 ? new Date(m.sortKeyMs).toISOString() : undefined;
   const hasPics = Boolean(album && album.media.length > 0);
 
-  const openCard = useCallback(
-    (target: "message" | "photos" | "all") => {
-      setExpanded(true);
-      if (target === "all") setPendingScroll("message");
-      else if (target === "photos" && hasPics) setPendingScroll("photos");
-      else setPendingScroll("message");
-    },
-    [hasPics],
-  );
+  const openCard = useCallback(() => {
+    setExpanded(true);
+    setPendingScroll(true);
+  }, []);
 
   useLayoutEffect(() => {
-    if (!expanded || pendingScroll === null) return;
-    const el =
-      pendingScroll === "photos"
-        ? photosRef.current
-        : messageRef.current;
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
-    queueMicrotask(() => {
-      setPendingScroll(null);
+    if (!expanded || !pendingScroll) return;
+    const el = headerRef.current;
+    requestAnimationFrame(() => {
+      scrollPostHeaderIntoView(el);
+      setPendingScroll(false);
     });
   }, [expanded, pendingScroll]);
 
@@ -593,7 +593,7 @@ function FormFeedItem({
               <button
                 type="button"
                 className="leroy-form-feed-pill"
-                onClick={() => openCard("message")}
+                onClick={openCard}
               >
                 Read post
               </button>
@@ -601,7 +601,7 @@ function FormFeedItem({
                 <button
                   type="button"
                   className="leroy-form-feed-pill"
-                  onClick={() => openCard("photos")}
+                  onClick={openCard}
                 >
                   See pics
                 </button>
@@ -611,7 +611,7 @@ function FormFeedItem({
           <button
             type="button"
             className="leroy-form-feed-open-all"
-            onClick={() => openCard("all")}
+            onClick={openCard}
             aria-label={`Open everything: ${m.displayName}`}
           >
             +
@@ -619,7 +619,7 @@ function FormFeedItem({
         </div>
       ) : (
         <div className="leroy-form-feed-expanded">
-          <div className="leroy-form-feed-expanded-top">
+          <div ref={headerRef} className="leroy-form-feed-expanded-top">
             <div className="leroy-form-feed-expanded-meta">
               <time className="leroy-form-feed-when" dateTime={dateTime}>
                 {m.when}
@@ -637,7 +637,7 @@ function FormFeedItem({
             </button>
           </div>
 
-          <div ref={messageRef} className="leroy-form-feed-message-block">
+          <div className="leroy-form-feed-message-block">
             <p className="leroy-form-feed-block-label">Message</p>
             <div className="leroy-form-feed-body">
               <FormMessageParagraphs text={m.message} />
@@ -648,7 +648,7 @@ function FormFeedItem({
           </div>
 
           {hasPics && album ? (
-            <div ref={photosRef} className="leroy-form-feed-photos-block">
+            <div className="leroy-form-feed-photos-block">
               <p className="leroy-form-feed-block-label">Their photos</p>
               <PhotoCarousel
                 media={album.media}
@@ -690,7 +690,7 @@ function FormFeedPhotoOnlyItem({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [pendingScroll, setPendingScroll] = useState(false);
-  const photosRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const sortKeyMs = albumPhotoLatestMs(album);
   const dateTimeAttr =
     sortKeyMs > 0 ? new Date(sortKeyMs).toISOString() : undefined;
@@ -703,8 +703,9 @@ function FormFeedPhotoOnlyItem({
 
   useLayoutEffect(() => {
     if (!expanded || !pendingScroll) return;
-    photosRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    queueMicrotask(() => {
+    const el = headerRef.current;
+    requestAnimationFrame(() => {
+      scrollPostHeaderIntoView(el);
       setPendingScroll(false);
     });
   }, [expanded, pendingScroll]);
@@ -745,7 +746,7 @@ function FormFeedPhotoOnlyItem({
         </div>
       ) : (
         <div className="leroy-form-feed-expanded">
-          <div className="leroy-form-feed-expanded-top">
+          <div ref={headerRef} className="leroy-form-feed-expanded-top">
             <div className="leroy-form-feed-expanded-meta">
               <time className="leroy-form-feed-when" dateTime={dateTimeAttr}>
                 {whenLabel}
@@ -766,7 +767,7 @@ function FormFeedPhotoOnlyItem({
             No form message here—only Dropbox photos where we read the name from
             the file.
           </p>
-          <div ref={photosRef} className="leroy-form-feed-photos-block">
+          <div className="leroy-form-feed-photos-block">
             <p className="leroy-form-feed-block-label">Photos</p>
             <PhotoCarousel
               media={album.media}

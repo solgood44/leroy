@@ -580,7 +580,7 @@ body {
 }
 
 #posts {
-  scroll-margin-top: 1.25rem;
+  scroll-margin-top: 5.5rem;
 }
 
 .leroy-update-entry-head {
@@ -1285,6 +1285,7 @@ body {
   margin-bottom: 0.85rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid rgba(229, 223, 214, 0.9);
+  scroll-margin-top: 5.5rem;
 }
 
 .leroy-form-feed-expanded-meta {
