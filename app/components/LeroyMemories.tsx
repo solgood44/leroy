@@ -281,6 +281,7 @@ function PhotoCarousel({
   onOpen,
   firstSlidePriority = false,
   fitContain = false,
+  isHero = false,
 }: {
   media: MemoryFile[];
   whenByFileId: Map<string, string>;
@@ -290,8 +291,11 @@ function PhotoCarousel({
   firstSlidePriority?: boolean;
   /** Show full image without cropping (hero carousel) */
   fitContain?: boolean;
+  /** Home hero: larger controls, keyboard arrows, swipe-friendly */
+  isHero?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const n = media.length;
   const lightboxSlides = useMemo(
@@ -331,15 +335,51 @@ function PhotoCarousel({
     [n],
   );
 
+  const goPrev = useCallback(() => scrollTo(index - 1), [index, scrollTo]);
+  const goNext = useCallback(() => scrollTo(index + 1), [index, scrollTo]);
+
+  useEffect(() => {
+    if (!isHero || n <= 1) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const root = rootRef.current;
+      if (!root) return;
+      const target = e.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT")
+      ) {
+        return;
+      }
+      if (!root.contains(document.activeElement) && document.activeElement !== document.body) {
+        return;
+      }
+      e.preventDefault();
+      if (e.key === "ArrowLeft") goPrev();
+      else goNext();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isHero, n, goPrev, goNext]);
+
   if (n === 0) return null;
+
+  const carouselClass = [
+    "leroy-photo-carousel",
+    fitContain ? "leroy-photo-carousel--contain" : "",
+    isHero ? "leroy-photo-carousel--hero" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
-      className={
-        fitContain
-          ? "leroy-photo-carousel leroy-photo-carousel--contain"
-          : "leroy-photo-carousel"
-      }
+      ref={rootRef}
+      className={carouselClass}
+      tabIndex={isHero ? 0 : undefined}
       role="region"
       aria-roledescription="carousel"
       aria-label={`Photos from ${albumLabel}`}
@@ -350,7 +390,7 @@ function PhotoCarousel({
             <button
               type="button"
               className="leroy-carousel-nav leroy-carousel-nav--prev"
-              onClick={() => scrollTo(index - 1)}
+              onClick={goPrev}
               disabled={index <= 0}
               aria-label="Previous photo"
             >
@@ -359,7 +399,7 @@ function PhotoCarousel({
             <button
               type="button"
               className="leroy-carousel-nav leroy-carousel-nav--next"
-              onClick={() => scrollTo(index + 1)}
+              onClick={goNext}
               disabled={index >= n - 1}
               aria-label="Next photo"
             >
@@ -422,11 +462,28 @@ function PhotoCarousel({
         </div>
       </div>
       {n > 1 ? (
-        <div className="leroy-carousel-meta">
+        <div
+          className={
+            isHero
+              ? "leroy-carousel-meta leroy-carousel-meta--hero"
+              : "leroy-carousel-meta"
+          }
+        >
           <p className="leroy-carousel-counter" aria-live="polite">
             {index + 1} / {n}
           </p>
-          <div className="leroy-carousel-dots" role="tablist" aria-label="Photo">
+          {isHero ? (
+            <p className="leroy-carousel-hint">Swipe or tap arrows</p>
+          ) : null}
+          <div
+            className={
+              isHero
+                ? "leroy-carousel-dots leroy-carousel-dots--hero"
+                : "leroy-carousel-dots"
+            }
+            role="tablist"
+            aria-label="Photo"
+          >
             {media.map((file, i) => (
               <button
                 key={file.id}
@@ -1370,6 +1427,7 @@ export function LeroyMemories({
             onOpen={openLightbox}
             firstSlidePriority
             fitContain
+            isHero
           />
         </div>
         <h1>LeRoy Harvey III</h1>

@@ -49,12 +49,34 @@ body {
 }
 
 .leroy-hero-carousel-wrap {
-  max-width: 520px;
+  width: 100%;
+  max-width: min(100%, 720px);
   margin: 0 auto 1.5rem;
+  padding: 0 0.15rem;
 }
 
 .leroy-hero-carousel-wrap .leroy-photo-carousel {
   margin: 0;
+}
+
+.leroy-photo-carousel--hero .leroy-photo-carousel-viewport {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.leroy-photo-carousel--hero .leroy-photo-carousel-track {
+  scroll-padding-inline: 0;
+  scrollbar-width: none;
+}
+
+.leroy-photo-carousel--hero .leroy-photo-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.leroy-photo-carousel--hero .leroy-carousel-photo-btn--contain {
+  border-radius: 12px;
+  min-height: 12rem;
 }
 
 .leroy-carousel-photo-btn--contain {
@@ -67,8 +89,62 @@ body {
   display: block;
   width: 100%;
   height: auto;
-  max-height: min(78vh, 720px);
+  max-height: min(72vh, 820px);
   object-fit: contain;
+}
+
+.leroy-photo-carousel--hero .leroy-carousel-photo-img--contain {
+  max-height: min(68vh, 820px);
+}
+
+.leroy-photo-carousel--hero .leroy-carousel-nav {
+  width: 2.85rem;
+  height: 2.85rem;
+  font-size: 1.5rem;
+  background: rgba(255, 252, 248, 0.97);
+}
+
+.leroy-photo-carousel--hero .leroy-carousel-nav--prev {
+  left: 0.35rem;
+}
+
+.leroy-photo-carousel--hero .leroy-carousel-nav--next {
+  right: 0.35rem;
+}
+
+.leroy-carousel-meta--hero {
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+  gap: 0.5rem 0.75rem;
+}
+
+.leroy-carousel-meta--hero .leroy-carousel-counter {
+  font-size: 0.9rem;
+}
+
+.leroy-carousel-hint {
+  margin: 0;
+  flex: 1 1 auto;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.leroy-carousel-dots--hero {
+  flex: 1 1 100%;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0.15rem 0 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.leroy-carousel-dots--hero .leroy-carousel-dot {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 .leroy-hero-photo {
@@ -247,6 +323,18 @@ body {
   .leroy-hero-carousel-wrap {
     margin-top: 0;
     margin-bottom: 1rem;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .leroy-photo-carousel--hero .leroy-carousel-nav {
+    width: 2.65rem;
+    height: 2.65rem;
+  }
+
+  .leroy-carousel-photo-img--contain,
+  .leroy-photo-carousel--hero .leroy-carousel-photo-img--contain {
+    max-height: min(62vh, 640px);
   }
 }
 

@@ -3,8 +3,8 @@
  * 1. Writes `public/memories-payload.json` — gallery JSON served from the CDN (no `/api/memories` route).
  * 2. Writes `lib/heroCarouselManifest.generated.ts` — full `/hero-carousel/…` and `/leroy-hero.jpeg` URLs in
  *    display order so `app/page.tsx` never calls `fs.readdir` on `public/hero-carousel` (Next would trace
- *    every hero image into the page bundle). First slide is always IMG_0597.jpeg; remainder is
- *    seeded-shuffled (stable for a given set of files; set HERO_CAROUSEL_SHUFFLE_SEED to change order).
+ *    every hero image into the page bundle). Slides are sorted by IMG number (oldest → newest) for
+ *    easy browsing.
  *
  * Usage: npm run build:memories-data
  */
@@ -21,9 +21,6 @@ const heroManifestPath = join(
   "heroCarouselManifest.generated.ts",
 );
 
-const FIRST_HERO_SLIDE = "leroy-memorial-main.jpeg";
-const ROOT_HERO_URL = "/leroy-hero.jpeg";
-
 async function listHeroCarouselFiles(): Promise<string[]> {
   try {
     return (await readdir(heroDir))
@@ -31,7 +28,12 @@ async function listHeroCarouselFiles(): Promise<string[]> {
         (n) =>
           /\.(jpe?g|png|gif|webp)$/i.test(n) && !n.startsWith("."),
       )
-      .sort();
+      .sort((a, b) => {
+        const na = Number(a.match(/IMG_(\d+)/i)?.[1] ?? 0);
+        const nb = Number(b.match(/IMG_(\d+)/i)?.[1] ?? 0);
+        if (na !== nb) return na - nb;
+        return a.localeCompare(b);
+      });
   } catch {
     return [];
   }
@@ -41,49 +43,13 @@ function quoteJsString(s: string): string {
   return JSON.stringify(s);
 }
 
-function seedFromString(s: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-function mulberry32(seed: number): () => number {
-  return () => {
-    let t = (seed += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function shuffleInPlace<T>(arr: T[], rng: () => number): void {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [arr[i], arr[j]] = [arr[j]!, arr[i]!];
-  }
-}
-
 function buildHeroCarouselUrls(heroFiles: string[]): string[] {
-  if (!heroFiles.includes(FIRST_HERO_SLIDE)) {
+  if (heroFiles.length === 0) {
     throw new Error(
-      `Missing public/hero-carousel/${FIRST_HERO_SLIDE} — add it (e.g. copy from Desktop/Pics) before build.`,
+      "No images in public/hero-carousel/ — add JPEGs before build.",
     );
   }
-  const rest = heroFiles.filter((f) => f !== FIRST_HERO_SLIDE);
-  const pool: string[] = [
-    ...rest.map((f) => `/hero-carousel/${f}`),
-    ROOT_HERO_URL,
-  ];
-  const seedExtra =
-    process.env.HERO_CAROUSEL_SHUFFLE_SEED?.trim() || "leroy-hero-v1";
-  const rng = mulberry32(
-    seedFromString([...pool].sort().join("|") + "|" + seedExtra),
-  );
-  shuffleInPlace(pool, rng);
-  return [`/hero-carousel/${FIRST_HERO_SLIDE}`, ...pool];
+  return heroFiles.map((f) => `/hero-carousel/${f}`);
 }
 
 async function main() {
@@ -105,7 +71,7 @@ async function main() {
     "\n];\n";
   await writeFile(heroManifestPath, ts, "utf8");
   console.log(
-    `Wrote ${heroManifestPath} (${heroUrls.length} hero slide(s), first ${FIRST_HERO_SLIDE})`,
+    `Wrote ${heroManifestPath} (${heroUrls.length} hero slide(s), first ${heroFiles[0] ?? "—"})`,
   );
 }
 
