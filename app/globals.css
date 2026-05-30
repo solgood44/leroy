@@ -1537,6 +1537,82 @@ body {
   flex-direction: column;
 }
 
+.leroy-posts-note-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.leroy-posts-photos-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0.65rem;
+}
+
+.leroy-posts-view-photos-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.65rem 1rem;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--surface);
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.leroy-posts-view-photos-btn:hover {
+  filter: brightness(1.05);
+}
+
+.leroy-posts-view-photos-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.leroy-posts-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.leroy-posts-back-btn:hover {
+  background: var(--accent-soft);
+}
+
+.leroy-posts-back-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.leroy-posts-single-photo-hint {
+  margin: 0.35rem 0 0;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
 .leroy-posts-photos-only-note {
   margin: 0 0 0.65rem;
   font-size: 0.88rem;
@@ -1548,10 +1624,13 @@ body {
   position: relative;
   flex: 1;
   min-height: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 .leroy-posts-carousel-track {
   display: flex;
+  width: 100%;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
