@@ -26,7 +26,6 @@ function formMessageToParagraphs(raw: string): string[] {
 const LINKS = {
   messageForm: "https://forms.gle/C2htuJ35AatoW2rh8",
   dropboxUpload: "https://www.dropbox.com/request/s6bnleq9kf4agf37k1bf",
-  facebookPost: "https://www.facebook.com/share/p/17HpPURTMR/",
   venmoDonation: "https://account.venmo.com/u/LeRoy-Harvey-3",
   featuredYoutubeVideo: "https://www.youtube.com/watch?v=qTXN_A8bUyI",
   leroyYoutubeChannel: "https://www.youtube.com/@LeRoyHarveyIII/videos",
@@ -91,31 +90,81 @@ function MemorialAnnouncement() {
   return (
     <section
       className="leroy-memorial"
-      aria-label="In loving memory of LeRoy Harvey III"
+      aria-label="Obituary for LeRoy Harvey III"
     >
       <span className="leroy-memorial-butterfly" aria-hidden>
         🦋
       </span>
-      <p className="leroy-memorial-eyebrow">In loving memory</p>
-      <h2 className="leroy-memorial-name">LeRoy Harvey III</h2>
-      <p className="leroy-memorial-dates">1959 – 2026</p>
+      <h2 className="leroy-memorial-name">
+        In Loving Memory of LeRoy Harvey III
+      </h2>
+      <p className="leroy-memorial-dates">
+        <time dateTime="1959-09-12">September 12, 1959</time>
+        {" – "}
+        <time dateTime="2026-05-19">May 19, 2026</time>
+      </p>
       <div className="leroy-memorial-letter">
         <p>
-          LeRoy Harvey III left his body peacefully on May 19th at 7:30PM. He
-          was at home, surrounded by so much love. His quiet and humble strength
-          was present throughout his last weeks, and days, and we are deeply
-          inspired and moved by his grace during this process.
+          We celebrate and honor the life of LeRoy Harvey III, who passed away
+          peacefully on May 19, 2026 surrounded by his children and loved ones.
         </p>
         <p>
-          Thank you from the bottom of our hearts for your continued support
-          during this time. The outpouring of love for our dad has given us
-          strength as we&apos;ve navigated this. We will update with details on a
-          memorial service when we can.
+          LeRoy lived a life defined by kindness, strength, humor, and an
+          unwavering love for family, friends, and the world around him. He
+          touched countless lives through his generous spirit and his ability to
+          make people feel seen and valued.
         </p>
-        <p className="leroy-memorial-signoff">
-          With love,
-          <br />
-          Molly &amp; Solomon
+        <p>
+          He devoted much of his life to environmental education, helping
+          students and communities understand the value of natural resources and
+          sustainable living. Through Green Team, Urban Options, and renewable
+          energy initiatives, he inspired others to care for the Earth and
+          future generations.
+        </p>
+        <p>
+          LeRoy also had a passion for physical fitness and the outdoors. He
+          loved running, biking, exercising, and spending time in nature.
+          Whether on a trail, on his bike, or simply enjoying the fresh air, he
+          found joy and peace in being outside.
+        </p>
+        <p>
+          Music was one of LeRoy&apos;s greatest passions. He played guitar for
+          most of his life and found tremendous joy in creating and sharing
+          music with others. Over the years, he played in many bands, forming
+          lasting friendships and memories through rehearsals, performances, and
+          jam sessions. Whether on stage, practicing at home, or talking about
+          music, it was an important part of who he was. Those who knew him will
+          remember not only the songs he played, but also the connection and
+          happiness that music brought to his life.
+        </p>
+        <p>
+          He is survived by his children, Solomon Harvey and Amalia Harvey; his
+          sister, Emmy Harvey; and his brothers, Felix Harvey and Zach Harvey.
+          He was preceded in death by his father, LeRoy Harvey II, and his
+          mother, Elise Harvey.
+        </p>
+        <div className="leroy-memorial-service">
+          <p className="leroy-memorial-service-intro">
+            Family and friends are invited to celebrate his life on:
+          </p>
+          <p className="leroy-memorial-service-date">
+            <time dateTime="2026-08-15">Saturday, August 15, 2026</time>
+          </p>
+          <ul className="leroy-memorial-service-details">
+            <li>Service: 5:00pm–6:00pm</li>
+            <li>Potluck and music: 6:00pm–8:00pm</li>
+          </ul>
+          <address className="leroy-memorial-service-venue">
+            Woldumar Nature Center
+            <br />
+            5739 Old Lansing Rd
+            <br />
+            Lansing, Michigan
+          </address>
+        </div>
+        <p>
+          We welcome all who knew LeRoy to join us in sharing memories and
+          honoring his special life.
         </p>
       </div>
     </section>
@@ -1118,11 +1167,6 @@ function FormMessagesFeed({
         read their note, then use <strong>View photos</strong> when they shared
         pictures. Use the arrows in the header to move between people.
       </p>
-      <p className="leroy-thanks leroy-thanks--feed">
-        Thank you for all the sweet messages and photos—we&apos;ve been
-        touched by every one.
-        <span className="leroy-thanks-sign">— Molly &amp; Solomon</span>
-      </p>
 
       <label className="leroy-posts-search">
         <span className="leroy-posts-search-label">Find a name</span>
@@ -1493,19 +1537,23 @@ function FamilySupportNotice() {
     <section
       id="support"
       className="leroy-support leroy-jump-target"
-      aria-label="How to help the family"
+      aria-label="Memorial contributions"
     >
       <p className="leroy-support-intro">
-        As we support our dad through end-of-life care, many friends and family
-        have asked how they can help. Donations will help with caregiving,
-        travel, meals, medical, and memorial expenses during this time. We are
-        deeply grateful for the love, prayers, kindness, and support shown to our
-        family.
+        Thank you for the incredible generosity, love, and support shown to our
+        family during this time. We are deeply grateful to everyone who has
+        donated, shared memories, offered prayers, sent cards, or simply kept us
+        in their thoughts.
+      </p>
+      <p className="leroy-support-intro">
+        In lieu of flowers, contributions made in LeRoy&apos;s memory will help
+        create a lasting tribute to his life, including a memorial bench and
+        support for causes, organizations, and communities that were meaningful
+        to him.
       </p>
       <p className="leroy-support-soft">
-        There is absolutely no pressure—sharing a note or a photo is a gift in
-        itself. If you&apos;d like to contribute financially, you can donate
-        with PayPal or Venmo using the buttons below.
+        Your kindness has meant so much to our family. Thank you for helping us
+        honor LeRoy&apos;s life and legacy.
       </p>
       <div className="leroy-support-donate-actions">
         <form
@@ -1519,7 +1567,7 @@ function FamilySupportNotice() {
           <input
             type="hidden"
             name="item_name"
-            value="Supporting our family through our dad's end-of-life care, travel, meals, and memorial expenses. Thank you."
+            value="In memory of LeRoy Harvey III — memorial bench and causes meaningful to him. Thank you."
           />
           <input type="hidden" name="currency_code" value="USD" />
           <button type="submit" className="leroy-support-donate-btn">
@@ -1594,29 +1642,6 @@ function QuickActions() {
               <span className="leroy-action-title">Upload a photo</span>
               <span className="leroy-action-desc">
                 Dropbox file request—no account needed (photos only on this page)
-              </span>
-            </span>
-            <span className="leroy-action-arrow" aria-hidden>
-              →
-            </span>
-          </a>
-        </li>
-        <li>
-          <a
-            className="leroy-action-card"
-            href={LINKS.facebookPost}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className="leroy-action-icon" aria-hidden>
-              💬
-            </span>
-            <span className="leroy-action-text">
-              <span className="leroy-action-title">
-                Write on LeRoy&apos;s Facebook post
-              </span>
-              <span className="leroy-action-desc">
-                Join the conversation there if you use Facebook
               </span>
             </span>
             <span className="leroy-action-arrow" aria-hidden>
