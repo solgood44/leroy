@@ -29,8 +29,7 @@ const LINKS = {
   venmoDonation: "https://account.venmo.com/u/LeRoy-Harvey-3",
   featuredYoutubeVideo: "https://www.youtube.com/watch?v=qTXN_A8bUyI",
   leroyYoutubeChannel: "https://www.youtube.com/@LeRoyHarveyIII/videos",
-  fellowshipLivestream:
-    "https://www.facebook.com/groups/fellowshipfortoday",
+  celebrationServiceVideo: "https://www.youtube.com/watch?v=yFvz7jJe4vg",
 } as const;
 
 const PROGRAM_PAGES = [
@@ -45,6 +44,7 @@ const PROGRAM_PAGES = [
 ] as const;
 
 const FEATURED_YOUTUBE_ID = "qTXN_A8bUyI";
+const SERVICE_YOUTUBE_ID = "yFvz7jJe4vg";
 
 type LightboxSlide = { url: string; label: string };
 
@@ -121,45 +121,46 @@ function MemorialAnnouncement({
         <time dateTime="2026-05-19">May 19, 2026</time>
       </p>
 
-      <div className="leroy-program-pages">
-        <p className="leroy-program-pages-label">Celebration of Life program</p>
-        <div className="leroy-program-pages-grid">
-          {PROGRAM_PAGES.map((page) => (
-            <button
-              key={page.url}
-              type="button"
-              className="leroy-program-page-btn"
-              onClick={() =>
-                onOpenLightbox(page.url, page.label, [...PROGRAM_PAGES])
-              }
-              aria-label={`View ${page.label}`}
-            >
-              <Image
-                src={page.url}
-                alt={page.label}
-                width={682}
-                height={1024}
-                className="leroy-program-page-img"
-                sizes="(max-width: 700px) 45vw, 280px"
-                quality={82}
-              />
-            </button>
-          ))}
+      <div className="leroy-celebration">
+        <p className="leroy-celebration-label">Celebration of Life</p>
+        <div className="leroy-celebration-video">
+          <iframe
+            src={`https://www.youtube.com/embed/${SERVICE_YOUTUBE_ID}`}
+            title="Celebration of Life service for LeRoy Harvey III"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
         </div>
-        <p className="leroy-program-pages-hint">Tap a page to view it larger</p>
+        <div className="leroy-program-pages">
+          <div className="leroy-program-pages-grid">
+            {PROGRAM_PAGES.map((page) => (
+              <button
+                key={page.url}
+                type="button"
+                className="leroy-program-page-btn"
+                onClick={() =>
+                  onOpenLightbox(page.url, page.label, [...PROGRAM_PAGES])
+                }
+                aria-label={`View ${page.label}`}
+              >
+                <Image
+                  src={page.url}
+                  alt={page.label}
+                  width={682}
+                  height={1024}
+                  className="leroy-program-page-img"
+                  sizes="(max-width: 700px) 45vw, 280px"
+                  quality={82}
+                />
+              </button>
+            ))}
+          </div>
+          <p className="leroy-program-pages-hint">
+            Program — tap a page to view it larger
+          </p>
+        </div>
       </div>
-
-      <p className="leroy-memorial-stream">
-        Can&apos;t attend in person? The service will be livestreamed on the{" "}
-        <a
-          href={LINKS.fellowshipLivestream}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Fellowship for Today Facebook group
-        </a>
-        .
-      </p>
 
       <div className="leroy-memorial-letter">
         <p>
@@ -220,13 +221,13 @@ function MemorialAnnouncement({
             Lansing, Michigan
           </address>
           <p className="leroy-memorial-service-stream">
-            Livestream:{" "}
+            Watch the service:{" "}
             <a
-              href={LINKS.fellowshipLivestream}
+              href={LINKS.celebrationServiceVideo}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Fellowship for Today on Facebook
+              Celebration of Life on YouTube
             </a>
           </p>
         </div>

@@ -2183,18 +2183,43 @@ body {
   color: var(--muted);
 }
 
-.leroy-program-pages {
-  margin: 1.15rem auto 0;
-  max-width: 36rem;
+.leroy-celebration {
+  margin: 1.25rem auto 0;
+  max-width: 42rem;
 }
 
-.leroy-program-pages-label {
-  margin: 0 0 0.65rem;
+.leroy-celebration-label {
+  margin: 0 0 0.75rem;
   font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--memorial-blue-muted, var(--muted));
+}
+
+.leroy-celebration-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #1c1a17;
+  border: 1px solid rgba(74, 126, 196, 0.25);
+  box-shadow: 0 8px 28px rgba(28, 26, 23, 0.12);
+}
+
+.leroy-celebration-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.leroy-program-pages {
+  margin: 0.9rem auto 0;
+  max-width: none;
 }
 
 .leroy-program-pages-grid {
@@ -2237,24 +2262,6 @@ body {
   margin: 0.5rem 0 0;
   font-size: 0.82rem;
   color: var(--muted);
-}
-
-.leroy-memorial-stream {
-  margin: 1rem auto 0;
-  max-width: 38rem;
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--text);
-  background: rgba(74, 126, 196, 0.1);
-  border: 1px solid rgba(74, 126, 196, 0.22);
-  border-radius: 10px;
-}
-
-.leroy-memorial-stream a {
-  font-weight: 600;
-  color: var(--memorial-blue, #4a7ec4);
-  text-underline-offset: 2px;
 }
 
 .leroy-memorial-service-stream {
